@@ -1,51 +1,399 @@
-<!doctype html><meta charset="utf-8">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Parametric linear systems — specimen plate</title>
+<title>Database of Scalable Parametric Linear Systems</title>
+<meta name="description" content="Scalable benchmark families for solving polynomial parametric linear systems by finite-field probing and rational-function reconstruction.">
 <style>
-  :root{ --ink:#1b2733; --ink2:#54606b; --line:#d7dde3; --paper:#fbfcfd; }
+  :root{
+    --ink:#111;
+    --muted:#555;
+    --line:#b9b9b9;
+    --soft:#f4f4f4;
+    --link:#0645ad;
+    --good:#f0f7f0;
+    --warn:#fff8e8;
+    --max:1120px;
+  }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--paper);color:var(--ink);
-    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    -webkit-font-smoothing:antialiased;padding:28px 20px 60px}
-  .head{max-width:1180px;margin:0 auto 22px}
-  .head h1{font-size:22px;margin:0 0 4px;letter-spacing:.2px}
-  .head p{margin:0;color:var(--ink2);font-size:13.5px;max-width:70ch;line-height:1.45}
-  .head code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12px;
-    background:#eef1f4;padding:1px 5px;border-radius:4px;color:#243}
-  .catsec{max-width:1180px;margin:0 auto 8px}
-  .catsec h2{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;
-    text-transform:uppercase;letter-spacing:.14em;color:var(--rail);margin:26px 2px 12px}
-  .rail{display:inline-block;width:26px;height:2px;background:var(--rail)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
-  .card{border:1px solid var(--line);border-left:3px solid var(--rail);border-radius:8px;
-    background:#fff;padding:13px 15px 14px;box-shadow:0 1px 2px rgba(20,40,60,.04)}
-  header{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-  .cid{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;font-weight:700;
-    color:#fff;background:var(--rail);padding:2px 7px;border-radius:5px;letter-spacing:.03em}
-  .cname{font-size:14.5px;font-weight:600;flex:1;min-width:150px}
-  .tag{font-family:ui-monospace,monospace;font-size:10.5px;color:var(--ink2);
-    background:var(--tint);border:1px solid var(--line);padding:1px 6px;border-radius:10px}
-  .eq{display:flex;align-items:center;gap:9px;overflow-x:auto;padding:6px 2px 9px}
-  .op{font-size:17px;color:var(--ink2);padding:0 1px}
-  .mtx{display:inline-grid;gap:2px 12px;position:relative;padding:5px 10px;
-    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12px;line-height:1.5;
-    white-space:nowrap}
-  .mtx::before,.mtx::after{content:"";position:absolute;top:2px;bottom:2px;width:6px;
-    border:1.5px solid var(--ink)}
-  .mtx::before{left:0;border-right:0}
-  .mtx::after{right:0;border-left:0}
-  .cell{text-align:right;padding:0 1px}
-  .params{font-family:ui-monospace,monospace;font-size:11px;color:#33475a;
-    background:var(--tint);border-radius:5px;padding:5px 8px;margin-top:2px}
-  .note{font-size:12.5px;color:var(--ink2);line-height:1.42;margin-top:8px}
-  @media(max-width:520px){ .grid{grid-template-columns:1fr} }
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    padding:24px 18px 64px;
+    color:var(--ink);
+    background:white;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:16px;
+    line-height:1.46;
+  }
+  main{max-width:var(--max);margin:0 auto}
+  h1{font-size:28px;margin:0 0 12px;font-weight:700}
+  h2{font-size:21px;margin:34px 0 12px}
+  h3{font-size:18px;margin:0 0 5px}
+  p{margin:8px 0}
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,.mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:.92em}
+  code{background:var(--soft);padding:1px 4px;border-radius:3px}
+  hr{border:0;border-top:1px solid #777;margin:24px 0}
+  .lead{max-width:92ch}
+  .small{font-size:14px;color:var(--muted)}
+  .index{
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    line-height:1.9;
+    margin:12px 0 2px;
+  }
+  .index a{white-space:nowrap}
+  .box{
+    border:1px solid var(--line);
+    background:#fafafa;
+    padding:13px 16px;
+    margin:14px 0;
+  }
+  .criteria{background:var(--good)}
+  .protocol{background:#f5f7fb}
+  .warning{background:var(--warn)}
+  .tablewrap{overflow-x:auto;margin:12px 0 18px}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{border:1px solid #999;padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#ededed;font-weight:700;white-space:nowrap}
+  td.num{text-align:right;font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;white-space:nowrap}
+  tr.core td:first-child{font-weight:700}
+  .legend{font-size:13px;color:var(--muted);margin-top:7px}
+  .system{
+    border-top:1px solid #aaa;
+    padding:17px 0 18px;
+  }
+  .system:first-of-type{border-top:0}
+  .syshead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .id{
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    font-weight:700;
+    min-width:36px;
+  }
+  .badge{
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    font-size:11px;
+    border:1px solid #aaa;
+    border-radius:10px;
+    padding:1px 7px;
+    background:#f7f7f7;
+    color:#333;
+  }
+  .meta{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:12.5px;color:#444;margin:4px 0 9px}
+  .formula{
+    margin:9px 0;
+    padding:9px 12px;
+    background:#f8f8f8;
+    border-left:3px solid #777;
+    overflow-x:auto;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    font-size:13px;
+    white-space:pre-wrap;
+  }
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .cols p{margin:5px 0}
+  .rank{font-weight:700}
+  .toplink{font-size:12px;margin-left:auto}
+  .refs li{margin:6px 0}
+  footer{margin-top:34px;padding-top:13px;border-top:1px solid #999;font-size:13px;color:var(--muted)}
+  @media(max-width:760px){
+    body{padding:18px 12px 48px;font-size:15px}
+    h1{font-size:24px}
+    .cols{grid-template-columns:1fr;gap:0}
+    th,td{padding:5px 6px}
+  }
 </style>
-<div class="head">
-  <h1>Parametric linear systems &mdash; specimen plate</h1>
-  <p>One small concrete instance of every family in the benchmark database, shown as
-  <code>A x = b</code> over its named parameters. Each matches
-  <code>ParametricSystems:-Show(id, n)</code> in the Maple module, so what you see here is what the
-  generator emits &mdash; scale <code>n</code> up to reach benchmark size. Rational-entry families
-  (A5, A8) are cleared per row before solving; B11 is singular by design (its kernel is the invariant).</p>
+</head>
+<body>
+<main id="top">
+
+<h1>The database of scalable parametric linear systems</h1>
+<p class="lead">
+This collection is for benchmarking algorithms that solve
+<code>A(y) x = b(y)</code> by evaluating the parameters in a finite field, solving the resulting
+numerical linear systems, and reconstructing the entries of <code>x</code> as multivariate rational functions.
+The organization follows the spirit of Jan Verschelde's PHCpack demonstration database: a compact system index,
+a characteristic table, precise definitions, and benchmark guidance.
+</p>
+
+<div class="box criteria">
+  <strong>Inclusion rule.</strong> Every family below is (i) linear in the unknown vector <code>x</code>,
+  (ii) scalable to a genuinely large matrix, (iii) polynomial in one or more symbolic parameters,
+  and (iv) generically nonsingular. There are no singular-kernel examples and no matrices with rational entries
+  that first have to be cleared. Unless a natural application right-hand side is stated, use the fixed integer vector
+  <code>b = [1,2,...,N]^T</code>; it adds no parameters and avoids some accidental symmetries.
 </div>
-<section class='catsec' style='--rail:#2b5c8a;--tint:#eef4fa'><h2><span class='rail'></span>Structured matrix families</h2><div class='grid'><article class='card'><header><span class='cid'>A1</span><span class='cname'>Symmetric Toeplitz</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>t₀</div><div class='cell'>t₁</div><div class='cell'>t₂</div><div class='cell'>t₁</div><div class='cell'>t₀</div><div class='cell'>t₁</div><div class='cell'>t₂</div><div class='cell'>t₁</div><div class='cell'>t₀</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>c₁</div><div class='cell'>c₂</div><div class='cell'>c₃</div></div></div><div class='params'>t₀, t₁, t₂  (b: c₁..c₃)</div><div class='note'>MRFI flagship. det is a symmetric polynomial in the tᵢ; degree/terms explode with n.</div></article><article class='card'><header><span class='cid'>A2</span><span class='cname'>General Toeplitz</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>t₀</div><div class='cell'>r₁</div><div class='cell'>r₂</div><div class='cell'>s₁</div><div class='cell'>t₀</div><div class='cell'>r₁</div><div class='cell'>s₂</div><div class='cell'>s₁</div><div class='cell'>t₀</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>c₁</div><div class='cell'>c₂</div><div class='cell'>c₃</div></div></div><div class='params'>t₀, r₁, r₂, s₁, s₂</div><div class='note'>Independent sub/super-diagonals → 2n−1 params. Isolates scaling in the number of parameters.</div></article><article class='card'><header><span class='cid'>A3</span><span class='cname'>Hankel</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>h₀</div><div class='cell'>h₁</div><div class='cell'>h₂</div><div class='cell'>h₁</div><div class='cell'>h₂</div><div class='cell'>h₃</div><div class='cell'>h₂</div><div class='cell'>h₃</div><div class='cell'>h₄</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>c₁</div><div class='cell'>c₂</div><div class='cell'>c₃</div></div></div><div class='params'>h₀..h₄</div><div class='note'>Constant anti-diagonals; det is the Hankel/moment determinant tied to Padé reconstruction.</div></article><article class='card'><header><span class='cid'>A4</span><span class='cname'>Vandermonde</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>1</div><div class='cell'>v₁</div><div class='cell'>v₁²</div><div class='cell'>1</div><div class='cell'>v₂</div><div class='cell'>v₂²</div><div class='cell'>1</div><div class='cell'>v₃</div><div class='cell'>v₃²</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>c₁</div><div class='cell'>c₂</div><div class='cell'>c₃</div></div></div><div class='params'>v₁, v₂, v₃</div><div class='note'>det = ∓∏(vᵢ−vⱼ). The transposed-Vandermonde solve is the exact C++ backend kernel (O(t²) fix).</div></article><article class='card'><header><span class='cid'>A5</span><span class='cname'>Cauchy</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>1/(x₁−y₁)</div><div class='cell'>1/(x₁−y₂)</div><div class='cell'>1/(x₁−y₃)</div><div class='cell'>1/(x₂−y₁)</div><div class='cell'>1/(x₂−y₂)</div><div class='cell'>1/(x₂−y₃)</div><div class='cell'>1/(x₃−y₁)</div><div class='cell'>1/(x₃−y₂)</div><div class='cell'>1/(x₃−y₃)</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>c₁</div><div class='cell'>c₂</div><div class='cell'>c₃</div></div></div><div class='params'>x₁..x₃, y₁..y₃</div><div class='note'>Rational entries → clear per row before solving. det factors completely; denominators are far from irreducible.</div></article><article class='card'><header><span class='cid'>A6</span><span class='cname'>KMS Toeplitz</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>1</div><div class='cell'>r</div><div class='cell'>r²</div><div class='cell'>r</div><div class='cell'>1</div><div class='cell'>r</div><div class='cell'>r²</div><div class='cell'>r</div><div class='cell'>1</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>c₁</div><div class='cell'>c₂</div><div class='cell'>c₃</div></div></div><div class='params'>r  (single parameter)</div><div class='note'>One-parameter family with tridiagonal inverse. Controlled near-univariate stress case.</div></article><article class='card'><header><span class='cid'>A7</span><span class='cname'>Tridiagonal (continuant)</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>a₁</div><div class='cell'>u₁</div><div class='cell'>0</div><div class='cell'>l₁</div><div class='cell'>a₂</div><div class='cell'>u₂</div><div class='cell'>0</div><div class='cell'>l₂</div><div class='cell'>a₃</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>c₁</div><div class='cell'>c₂</div><div class='cell'>c₃</div></div></div><div class='params'>a₁..a₃, u₁,u₂, l₁,l₂</div><div class='note'>det is a continuant (3-term recurrence); each xᵢ is a ratio of continuants with closed-form degree.</div></article><article class='card'><header><span class='cid'>A8</span><span class='cname'>Generalized Hilbert</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>1/(x₁+y₁)</div><div class='cell'>1/(x₁+y₂)</div><div class='cell'>1/(x₁+y₃)</div><div class='cell'>1/(x₂+y₁)</div><div class='cell'>1/(x₂+y₂)</div><div class='cell'>1/(x₂+y₃)</div><div class='cell'>1/(x₃+y₁)</div><div class='cell'>1/(x₃+y₂)</div><div class='cell'>1/(x₃+y₃)</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>c₁</div><div class='cell'>c₂</div><div class='cell'>c₃</div></div></div><div class='params'>x₁..x₃, y₁..y₃</div><div class='note'>Parametrized Cauchy/Hilbert variant; large content after clearing. Stresses coefficient growth.</div></article></div></section><section class='catsec' style='--rail:#3f7a3a;--tint:#eef6ec'><h2><span class='rail'></span>Application-derived systems</h2><div class='grid'><article class='card'><header><span class='cid'>B1</span><span class='cname'>Parametric Markov chain — reachability</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>1</div><div class='cell'>−p</div><div class='cell'>−(1−p)</div><div class='cell'>−(1−q)</div><div class='cell'>1</div><div class='cell'>0</div><div class='cell'>0</div><div class='cell'>−(1−r)</div><div class='cell'>1</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>0</div><div class='cell'>q</div><div class='cell'>r</div></div></div><div class='params'>p, q, r  (transition probabilities)</div><div class='note'>(I−P) x = boundary. xᵢ = reach-target probability, rational in the transition probabilities.</div></article><article class='card'><header><span class='cid'>B2</span><span class='cname'>Herman self-stabilizing ring</span><span class='tag'>representative</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>1</div><div class='cell'>−h</div><div class='cell'>0</div><div class='cell'>0</div><div class='cell'>1</div><div class='cell'>−h</div><div class='cell'>−h</div><div class='cell'>0</div><div class='cell'>1</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>1−h</div><div class='cell'>1−h</div><div class='cell'>1−h</div></div></div><div class='params'>h  (single coin-bias parameter)</div><div class='note'>Same (I−P) shape as B1 with one bias h; degree in h grows as the ring lengthens.</div></article><article class='card'><header><span class='cid'>B3</span><span class='cname'>Israeli–Jalfon (multi-parameter)</span><span class='tag'>representative</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>1</div><div class='cell'>−p₁</div><div class='cell'>−(1−p₁)</div><div class='cell'>−(1−p₂)</div><div class='cell'>1</div><div class='cell'>0</div><div class='cell'>0</div><div class='cell'>−(1−p₂)</div><div class='cell'>1</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>0</div><div class='cell'>p₂</div><div class='cell'>p₂</div></div></div><div class='params'>p₁, p₂  (→ n params for n processes)</div><div class='note'>Engineered so parameter count grows with process count — the many-parameter regime.</div></article><article class='card'><header><span class='cid'>B4</span><span class='cname'>Feynman IBP reduction</span><span class='tag'>schematic</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>d−2</div><div class='cell'>−s</div><div class='cell'>0</div><div class='cell'>1</div><div class='cell'>d−3</div><div class='cell'>−s</div><div class='cell'>0</div><div class='cell'>2</div><div class='cell'>d−4</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>c₁</div><div class='cell'>c₂</div><div class='cell'>c₃</div></div></div><div class='params'>d (dimension), s (invariant); cᵢ = master integrals</div><div class='note'>Miniature of an IBP system: entries polynomial in d and kinematics; real ones reach 10⁴–10⁶ rows. FireFly analogue.</div></article><article class='card'><header><span class='cid'>B5</span><span class='cname'>Symbolic MNA circuit (RC ladder)</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>g₁+s·c₁</div><div class='cell'>−s·c₁</div><div class='cell'>0</div><div class='cell'>−s·c₁</div><div class='cell'>s·c₁+g₂+s·c₂</div><div class='cell'>−s·c₂</div><div class='cell'>0</div><div class='cell'>−s·c₂</div><div class='cell'>s·c₂+g₃</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>v₁</div><div class='cell'>v₂</div><div class='cell'>v₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>J</div><div class='cell'>0</div><div class='cell'>0</div></div></div><div class='params'>g₁..g₃, c₁,c₂, s (Laplace); J = source current</div><div class='note'>Nodal admittance system; solving gives node voltages = transfer functions rational in s and components.</div></article><article class='card'><header><span class='cid'>B6</span><span class='cname'>Chemical reaction network (steady state)</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>−k₁</div><div class='cell'>k₂</div><div class='cell'>0</div><div class='cell'>k₁</div><div class='cell'>−(k₂+k₃)</div><div class='cell'>0</div><div class='cell'>1</div><div class='cell'>1</div><div class='cell'>1</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>[A]</div><div class='cell'>[B]</div><div class='cell'>[C]</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>0</div><div class='cell'>0</div><div class='cell'>T</div></div></div><div class='params'>k₁, k₂, k₃ (rates), T (conservation)</div><div class='note'>Mass-action steady state + conservation row. Concentrations are rational in the rate constants.</div></article><article class='card'><header><span class='cid'>B7</span><span class='cname'>Weighted graph Laplacian (path)</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>w₁</div><div class='cell'>−w₁</div><div class='cell'>0</div><div class='cell'>−w₁</div><div class='cell'>w₁+w₂</div><div class='cell'>−w₂</div><div class='cell'>0</div><div class='cell'>−w₂</div><div class='cell'>w₂+w₃</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>φ₁</div><div class='cell'>φ₂</div><div class='cell'>φ₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>1</div><div class='cell'>0</div><div class='cell'>0</div></div></div><div class='params'>w₁, w₂, w₃ (edge weights)</div><div class='note'>Reduced symbolic Laplacian; det = spanning-tree polynomial. Effective resistances = ratios of such dets.</div></article><article class='card'><header><span class='cid'>B8</span><span class='cname'>Kinematics linear block</span><span class='tag'>schematic</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>c</div><div class='cell'>−s</div><div class='cell'>l₁</div><div class='cell'>s</div><div class='cell'>c</div><div class='cell'>0</div><div class='cell'>0</div><div class='cell'>0</div><div class='cell'>1</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>p_x</div><div class='cell'>p_y</div><div class='cell'>1</div></div></div><div class='params'>c=cosθ, s=sinθ, l₁ (link length)</div><div class='note'>Representative linear-in-unknowns block extracted from inverse kinematics; feeds a Dixon pipeline.</div></article><article class='card'><header><span class='cid'>B9</span><span class='cname'>Dixon resultant interpolation</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>1</div><div class='cell'>1</div><div class='cell'>1</div><div class='cell'>v₁</div><div class='cell'>v₂</div><div class='cell'>v₃</div><div class='cell'>v₁²</div><div class='cell'>v₂²</div><div class='cell'>v₃²</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>e₁</div><div class='cell'>e₂</div><div class='cell'>e₃</div></div></div><div class='params'>v₁..v₃ (nodes); eᵢ = evaluations</div><div class='note'>Transposed Vandermonde arising when interpolating a Dixon resultant — in-house benchmark of your group.</div></article><article class='card'><header><span class='cid'>B10</span><span class='cname'>Model-order reduction (resolvent)</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>s+1</div><div class='cell'>−p</div><div class='cell'>0</div><div class='cell'>0</div><div class='cell'>s+2</div><div class='cell'>−1</div><div class='cell'>−p</div><div class='cell'>0</div><div class='cell'>s+3</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>e₁</div><div class='cell'>e₂</div><div class='cell'>e₃</div></div></div><div class='params'>s (frequency), p (design parameter)</div><div class='note'>(sI − A(p)) x = b; solution entries are the rational transfer-function values.</div></article><article class='card'><header><span class='cid'>B11</span><span class='cname'>Lie-algebra invariant (kernel)</span><span class='tag'>kernel</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>0</div><div class='cell'>x₃</div><div class='cell'>−x₂</div><div class='cell'>−x₃</div><div class='cell'>0</div><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>−x₁</div><div class='cell'>0</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>ξ₁</div><div class='cell'>ξ₂</div><div class='cell'>ξ₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>0</div><div class='cell'>0</div><div class='cell'>0</div></div></div><div class='params'>x₁, x₂, x₃ (structure-constant coords)</div><div class='note'>Skew coadjoint matrix (singular by design). Its kernel over ℚ(xᵢ) is the invariant x₁²+x₂²+x₃².</div></article><article class='card'><header><span class='cid'>B12</span><span class='cname'>Algebraic statistics (stationary dist.)</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>−a</div><div class='cell'>0</div><div class='cell'>c</div><div class='cell'>a</div><div class='cell'>−b</div><div class='cell'>0</div><div class='cell'>1</div><div class='cell'>1</div><div class='cell'>1</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>π₁</div><div class='cell'>π₂</div><div class='cell'>π₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>0</div><div class='cell'>0</div><div class='cell'>1</div></div></div><div class='params'>a, b, c (escape probabilities)</div><div class='note'>(Pᵀ−I) with a normalization row; stationary distribution rational in the transition parameters.</div></article><article class='card'><header><span class='cid'>B13</span><span class='cname'>Petri-net marking / flow</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>w₁</div><div class='cell'>0</div><div class='cell'>−1</div><div class='cell'>−1</div><div class='cell'>w₂</div><div class='cell'>0</div><div class='cell'>0</div><div class='cell'>−1</div><div class='cell'>w₃</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>σ₁</div><div class='cell'>σ₂</div><div class='cell'>σ₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>d₁</div><div class='cell'>d₂</div><div class='cell'>d₃</div></div></div><div class='params'>w₁, w₂, w₃ (arc weights); dᵢ = Δmarking</div><div class='note'>Incidence-matrix equation Nσ = Δm. Stochastic-net steady state coincides with a parametric Markov chain.</div></article><article class='card'><header><span class='cid'>B14</span><span class='cname'>Parametric least squares (normal eqns)</span><span class='tag'>n=2</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(2,auto)'><div class='cell'>3</div><div class='cell'>u₁+u₂+u₃</div><div class='cell'>u₁+u₂+u₃</div><div class='cell'>u₁²+u₂²+u₃²</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>β₀</div><div class='cell'>β₁</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>y₁+y₂+y₃</div><div class='cell'>u₁·y₁+u₂·y₂+u₃·y₃</div></div></div><div class='params'>u₁..u₃ (nodes), y₁..y₃ (data)</div><div class='note'>MᵀM x = Mᵀy for M = [[1, uᵢ]]. Fitted coefficients are rational in the design parameters.</div></article></div></section><section class='catsec' style='--rail:#b5632a;--tint:#fbefe6'><h2><span class='rail'></span>Synthetic scalable families</h2><div class='grid'><article class='card'><header><span class='cid'>C1</span><span class='cname'>Random sparse parametric</span><span class='tag'>n=3, knobs n,m,T,d</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>f₁₁</div><div class='cell'>f₁₂</div><div class='cell'>f₁₃</div><div class='cell'>f₂₁</div><div class='cell'>f₂₂</div><div class='cell'>f₂₃</div><div class='cell'>f₃₁</div><div class='cell'>f₃₂</div><div class='cell'>f₃₃</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>c₁</div><div class='cell'>c₂</div><div class='cell'>c₃</div></div></div><div class='params'>each fᵢⱼ = a random sparse poly in m params, T terms, degree d</div><div class='note'>Dial s, d, |S| independently to draw clean scaling curves. Fix the RNG seed for reproducibility.</div></article><article class='card'><header><span class='cid'>C2</span><span class='cname'>Kronecker-substitution stress</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>g₁₁</div><div class='cell'>g₁₂</div><div class='cell'>g₁₃</div><div class='cell'>g₂₁</div><div class='cell'>g₂₂</div><div class='cell'>g₂₃</div><div class='cell'>g₃₁</div><div class='cell'>g₃₂</div><div class='cell'>g₃₃</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x₁</div><div class='cell'>x₂</div><div class='cell'>x₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>c₁</div><div class='cell'>c₂</div><div class='cell'>c₃</div></div></div><div class='params'>gᵢⱼ with uneven, large per-variable partial degrees</div><div class='note'>Forces large Kronecker exponents to stress the univariatization and the Berlekamp–Massey / Newton backends.</div></article><article class='card'><header><span class='cid'>C3</span><span class='cname'>Prescribed-solution (fault injection)</span><span class='tag'>n=3</span></header><div class='eq'><div class='mtx' style='grid-template-columns:repeat(3,auto)'><div class='cell'>a₁₁</div><div class='cell'>a₁₂</div><div class='cell'>a₁₃</div><div class='cell'>a₂₁</div><div class='cell'>a₂₂</div><div class='cell'>a₂₃</div><div class='cell'>a₃₁</div><div class='cell'>a₃₂</div><div class='cell'>a₃₃</div></div><div class='mtx' style='grid-template-columns:auto'><div class='cell'>x*₁</div><div class='cell'>x*₂</div><div class='cell'>x*₃</div></div><span class='op'>=</span><div class='mtx' style='grid-template-columns:auto'><div class='cell'>(A x*)₁</div><div class='cell'>(A x*)₂</div><div class='cell'>(A x*)₃</div></div></div><div class='params'>choose sparse rational x*, sparse A → set b = A x*</div><div class='note'>Known ground truth. Inject faults into evaluations to test the error-correction of HFTRFR / DFTRFR.</div></article></div></section>
+
+<p><strong>Sections:</strong>
+  <a href="#short">Short descriptions</a> |
+  <a href="#char">Characteristic numbers</a> |
+  <a href="#systems">System definitions</a> |
+  <a href="#protocol">Benchmark protocol</a> |
+  <a href="#refs">References</a>
+</p>
+
+<hr>
+
+<h2 id="short">Short description of systems</h2>
+<p class="small">The first six are structured matrix families; R1–R3 are algebraic/resultant families; P1–P5 come from scalable applications.</p>
+<div class="index">
+  <a href="#S1">S1 symmetric Toeplitz</a> |
+  <a href="#S2">S2 general Toeplitz</a> |
+  <a href="#S3">S3 Hankel</a> |
+  <a href="#S4">S4 banded Toeplitz</a> |
+  <a href="#S5">S5 block Toeplitz / Toeplitz blocks</a> |
+  <a href="#S6">S6 generic tridiagonal</a><br>
+  <a href="#R1">R1 Sylvester resultant matrix</a> |
+  <a href="#R2">R2 Bézout matrix</a> |
+  <a href="#R3">R3 companion resolvent</a><br>
+  <a href="#P1">P1 grounded weighted grid Laplacian</a> |
+  <a href="#P2">P2 2-D convection–diffusion</a> |
+  <a href="#P3">P3 RC ladder admittance</a> |
+  <a href="#P4">P4 mass–spring dynamic stiffness</a> |
+  <a href="#P5">P5 birth–death reachability</a>
+</div>
+
+<hr>
+
+<h2 id="char">Characteristic numbers</h2>
+<div class="tablewrap">
+<table aria-label="Characteristic numbers of benchmark families">
+  <thead>
+    <tr>
+      <th>ID</th><th>family</th><th>matrix dimension N</th><th># parameters m</th><th>max input degree</th><th>nonzeros</th><th>good first sweep</th><th>main stress</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="core"><td>S1</td><td>Symmetric Toeplitz</td><td class="num">n</td><td class="num">n</td><td class="num">1</td><td class="num">n²</td><td>n = 8, 12, 16, 20</td><td>dense output complexity</td></tr>
+    <tr><td>S2</td><td>General Toeplitz</td><td class="num">n</td><td class="num">2n−1</td><td class="num">1</td><td class="num">n²</td><td>n = 6, 8, 10, 12</td><td>parameter-count growth</td></tr>
+    <tr><td>S3</td><td>Hankel</td><td class="num">n</td><td class="num">2n−1</td><td class="num">1</td><td class="num">n²</td><td>n = 6, 8, 10, 12</td><td>dense moment determinant</td></tr>
+    <tr class="core"><td>S4</td><td>Banded Toeplitz</td><td class="num">n</td><td class="num">2w+1</td><td class="num">1</td><td class="num">≤ n(2w+1)</td><td>n = 50, 100, 200; w = 2, 4</td><td>large N with fixed m</td></tr>
+    <tr><td>S5</td><td>BTTB</td><td class="num">q²</td><td class="num">(2q−1)²</td><td class="num">1</td><td class="num">q⁴</td><td>q = 4, 6, 8, 10</td><td>2-D structured / many params</td></tr>
+    <tr><td>S6</td><td>Generic tridiagonal</td><td class="num">n</td><td class="num">3n−2</td><td class="num">1</td><td class="num">3n−2</td><td>n = 20, 40, 80, 160</td><td>many params, sparse A</td></tr>
+    <tr><td>R1</td><td>Sylvester matrix</td><td class="num">r+s</td><td class="num">r+s+2</td><td class="num">1</td><td class="num">2rs+r+s</td><td>r=s = 8, 12, 16, 24</td><td>resultant denominator</td></tr>
+    <tr><td>R2</td><td>Bézout matrix</td><td class="num">q</td><td class="num">2q+2</td><td class="num">2</td><td class="num">q²</td><td>q = 6, 8, 10, 12</td><td>degree-2 dense input</td></tr>
+    <tr class="core"><td>R3</td><td>Companion resolvent</td><td class="num">n</td><td class="num">n+1</td><td class="num">1</td><td class="num">≤ 3n−2</td><td>n = 50, 100, 200, 400</td><td>large sparse control case</td></tr>
+    <tr class="core"><td>P1</td><td>Grounded grid Laplacian</td><td class="num">q²−1</td><td class="num">2q(q−1)</td><td class="num">1</td><td class="num">≈ 5N</td><td>q = 4, 5, 6, 8</td><td>very hard multivariate denominator</td></tr>
+    <tr class="core"><td>P2</td><td>2-D convection–diffusion</td><td class="num">q²</td><td class="num">3</td><td class="num">1</td><td class="num">≈ 5N</td><td>q = 8, 12, 16, 20</td><td>large N, only 3 params</td></tr>
+    <tr><td>P3</td><td>RC ladder</td><td class="num">n</td><td class="num">2n+3</td><td class="num">2</td><td class="num">3n−2</td><td>n = 20, 40, 80, 160</td><td>degree-2 sparse application</td></tr>
+    <tr><td>P4</td><td>Mass–spring chain</td><td class="num">n</td><td class="num">2n+2</td><td class="num">2</td><td class="num">3n−2</td><td>n = 20, 40, 80, 160</td><td>resonant denominator / many params</td></tr>
+    <tr><td>P5</td><td>Birth–death reachability</td><td class="num">n</td><td class="num">2n</td><td class="num">1</td><td class="num">3n−2</td><td>n = 20, 40, 80, 160</td><td>probabilistic application</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="legend"><strong>N</strong> is the number of unknowns/equations. <strong>m</strong> counts symbolic parameters only; the fixed benchmark right-hand side is not included. “Max input degree” is total degree in the parameters of an entry of A or b.</p>
+
+<div class="box warning">
+  <strong>Best four to start with:</strong> S1 (your current flagship), S4 (large matrix while keeping parameter count small),
+  P1 (hard many-parameter graph problem), and P2 (hundreds of equations with only three parameters). Together they separate
+  the effects of matrix dimension, number of parameters, and rational-output complexity much better than a collection of small unrelated examples.
+</div>
+
+<hr>
+
+<h2 id="systems">System definitions</h2>
+
+<section class="system" id="S1">
+  <div class="syshead"><span class="id">S1</span><h3>Symmetric Toeplitz</h3><span class="badge">primary dense benchmark</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=n · m=n · degree=1 · dense</div>
+  <div class="formula">A[i,j] = t[|i-j|],              1 ≤ i,j ≤ n
+b[i]   = i</div>
+  <div class="cols"><p><strong>Parameters.</strong> t₀,…,tₙ₋₁.</p><p><strong>Suggested sweep.</strong> n = 8, 12, 16, 20, then increase until probe count or reconstruction dominates.</p></div>
+  <p><strong>Why use it.</strong> This is the cleanest baseline for the whole database: the matrix is dense, every entry is linear in the parameters, the parameter count grows with n, and setting t₀=1 with all other tᵢ=0 gives the identity, so the family is generically nonsingular.</p>
+</section>
+
+<section class="system" id="S2">
+  <div class="syshead"><span class="id">S2</span><h3>General Toeplitz</h3><span class="badge">many parameters</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=n · m=2n−1 · degree=1 · dense</div>
+  <div class="formula">A[i,j] = t[j-i],                −(n−1) ≤ j−i ≤ n−1
+b[i]   = i</div>
+  <p><strong>Parameters.</strong> t₋ₙ₊₁,…,t₋₁,t₀,t₁,…,tₙ₋₁.</p>
+  <p><strong>Why use it.</strong> It keeps the same dense Toeplitz geometry as S1 but roughly doubles the parameter count. Compare S1 and S2 at the same n to isolate the cost of additional variables in the reconstructed rational functions.</p>
+</section>
+
+<section class="system" id="S3">
+  <div class="syshead"><span class="id">S3</span><h3>Hankel</h3><span class="badge">dense structured</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=n · m=2n−1 · degree=1 · dense</div>
+  <div class="formula">A[i,j] = h[i+j-2],              0 ≤ i+j−2 ≤ 2n−2
+b[i]   = i</div>
+  <p><strong>Parameters.</strong> h₀,…,h₂ₙ₋₂. Choosing hₙ₋₁=1 and all other hᵢ=0 gives the reversal permutation matrix, hence the determinant is not identically zero.</p>
+  <p><strong>Why use it.</strong> It has the same parameter count as S2 but a different repeated-entry pattern. This makes S2 versus S3 a useful structure comparison without changing n or m.</p>
+</section>
+
+<section class="system" id="S4">
+  <div class="syshead"><span class="id">S4</span><h3>Banded Toeplitz</h3><span class="badge">large-N benchmark</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=n · m=2w+1 · degree=1 · sparse</div>
+  <div class="formula">A[i,j] = t[j-i]   if |j-i| ≤ w,
+         = 0        otherwise.
+b[i]   = i</div>
+  <p><strong>Parameters.</strong> t₋w,…,t₀,…,t_w. Treat bandwidth w as a second benchmark knob.</p>
+  <p><strong>Why use it.</strong> This is the simplest way to make the numerical solve large without simultaneously making the interpolation dimension large. Hold w fixed and grow n. It is therefore one of the most important complements to S1.</p>
+</section>
+
+<section class="system" id="S5">
+  <div class="syshead"><span class="id">S5</span><h3>Block Toeplitz with Toeplitz blocks (BTTB)</h3><span class="badge">2-D structured</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=q² · m=(2q−1)² · degree=1 · dense</div>
+  <div class="formula">Index rows/columns by grid pairs (r,c),(u,v) ∈ {0,…,q−1}².
+A[(r,c),(u,v)] = τ[u-r, v-c].
+b[k] = k+1.</div>
+  <p><strong>Parameters.</strong> One τ<sub>a,b</sub> for each offset −(q−1)≤a,b≤q−1.</p>
+  <p><strong>Why use it.</strong> This is the natural two-dimensional analogue of general Toeplitz. The matrix dimension grows quadratically in q while the number of shift parameters also grows on the order of N. It is a strong dense many-parameter stress test.</p>
+</section>
+
+<section class="system" id="S6">
+  <div class="syshead"><span class="id">S6</span><h3>Generic tridiagonal / continuant family</h3><span class="badge">sparse many-parameter</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=n · m=3n−2 · degree=1 · sparse</div>
+  <div class="formula">A[i,i]   = d[i]
+A[i,i+1] = u[i]      (1 ≤ i &lt; n)
+A[i+1,i] = l[i]      (1 ≤ i &lt; n)
+all other entries = 0
+b[i] = i</div>
+  <p><strong>Parameters.</strong> d₁,…,dₙ, u₁,…,uₙ₋₁, l₁,…,lₙ₋₁.</p>
+  <p><strong>Why use it.</strong> Parameter count is very high relative to matrix sparsity. It separates “many interpolation variables” from “expensive dense finite-field solve.” The determinant obeys the standard continuant recurrence, so this is also easy to validate independently.</p>
+</section>
+
+<section class="system" id="R1">
+  <div class="syshead"><span class="id">R1</span><h3>Sylvester resultant matrix</h3><span class="badge">algebraic benchmark</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=r+s · m=r+s+2 · degree=1 · structured</div>
+  <div class="formula">f(z) = a₀ + a₁z + ··· + aᵣzʳ
+g(z) = b₀ + b₁z + ··· + bₛzˢ
+A     = Sylvester(f,g) ∈ Z[a,b]^(r+s)×(r+s)
+b[k]  = k</div>
+  <p><strong>Parameters.</strong> a₀,…,aᵣ,b₀,…,bₛ. For a balanced sweep use r=s.</p>
+  <p><strong>Why use it.</strong> The determinant is the resultant of two generic polynomials. This gives a very natural algebraic denominator rather than an arbitrary random one, and the family scales directly by increasing the polynomial degrees.</p>
+</section>
+
+<section class="system" id="R2">
+  <div class="syshead"><span class="id">R2</span><h3>Bézout matrix of two generic polynomials</h3><span class="badge">degree-2 input</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=q · m=2q+2 · degree=2 · dense</div>
+  <div class="formula">f(z)=Σ(i=0..q) aᵢ zⁱ,     g(z)=Σ(i=0..q) bᵢ zⁱ
+(f(x)g(y) − f(y)g(x))/(x−y)
+     = Σ(i=1..q) Σ(j=1..q) B[i,j] x^(i−1) y^(j−1)
+A = B(f,g),     b[k]=k</div>
+  <p><strong>Why use it.</strong> Unlike most families here, the matrix entries themselves are bilinear in the parameters. This is a controlled test of the effect of input degree 2 while retaining a canonical resultant structure.</p>
+</section>
+
+<section class="system" id="R3">
+  <div class="syshead"><span class="id">R3</span><h3>Companion resolvent</h3><span class="badge">large sparse control</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=n · m=n+1 · degree=1 · sparse</div>
+  <div class="formula">f(z)=zⁿ+a[n−1]z^(n−1)+···+a₁z+a₀
+C = companion matrix of f
+A(s,a) = s I − C
+b[i] = i
+
+det(A)=f(s).</div>
+  <p><strong>Parameters.</strong> s,a₀,…,aₙ₋₁.</p>
+  <p><strong>Why use it.</strong> This is a deliberately structured control case: N can be pushed very high, the matrix has only O(N) nonzeros, and the exact denominator is known. It is useful for checking whether failures are caused by your reconstruction machinery rather than by an intrinsically difficult matrix family.</p>
+</section>
+
+<section class="system" id="P1">
+  <div class="syshead"><span class="id">P1</span><h3>Grounded weighted q×q grid Laplacian</h3><span class="badge">hard graph benchmark</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=q²−1 · m=2q(q−1) · degree=1 · sparse</div>
+  <div class="formula">Let G be the q×q nearest-neighbour grid, with one parameter w[e] per edge.
+L[v,v] = Σ(e incident to v) w[e]
+L[u,v] = −w[{u,v}] if u and v are adjacent, else 0.
+A = L with one ground vertex row/column deleted.
+b = e_source.</div>
+  <p><strong>Parameters.</strong> One independent edge weight for each of the 2q(q−1) grid edges.</p>
+  <p><strong>Why use it.</strong> The determinant of the grounded Laplacian is the weighted spanning-tree polynomial. The number of monomials can grow extremely quickly, so this is an excellent “output complexity” stress test for sparse rational reconstruction. Start small: q=4 or 5 may already be substantially harder than its matrix dimension suggests.</p>
+</section>
+
+<section class="system" id="P2">
+  <div class="syshead"><span class="id">P2</span><h3>2-D convection–diffusion finite-difference system</h3><span class="badge">hundreds of equations / 3 params</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=q² · m=3 · degree=1 · sparse five-point stencil</div>
+  <div class="formula">On a q×q interior grid with Dirichlet boundary conditions, use the stencil
+              north: −2+β
+west: −2−α   center: 8+2γ   east: −2+α
+              south: −2−β
+
+A = A_q(α,β,γ),     b = e_center.</div>
+  <p><strong>Parameters.</strong> α (x-convection), β (y-convection), γ (reaction/shift).</p>
+  <p><strong>Why use it.</strong> Only three parameters are reconstructed no matter how large q becomes. This makes it the cleanest benchmark for the cost of repeated finite-field solves as N grows. It is the family to use when you want N=100–400 without simultaneously exploding the parameter dimension.</p>
+</section>
+
+<section class="system" id="P3">
+  <div class="syshead"><span class="id">P3</span><h3>RC ladder nodal-admittance system</h3><span class="badge">circuit / degree 2</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=n · m=2n+3 · degree=2 · tridiagonal</div>
+  <div class="formula">For edges i=1,…,n+1 define yᵢ = gᵢ + s cᵢ.
+A[i,i]   = yᵢ + yᵢ₊₁
+A[i,i+1] = A[i+1,i] = −yᵢ₊₁
+b = e₁.</div>
+  <p><strong>Parameters.</strong> Laplace parameter s, conductances g₁,…,gₙ₊₁, and capacitances c₁,…,cₙ₊₁.</p>
+  <p><strong>Why use it.</strong> This gives a real transfer-function problem with a very large number of component parameters. The products s·cᵢ make the polynomial entry degree 2 without making the matrix dense.</p>
+</section>
+
+<section class="system" id="P4">
+  <div class="syshead"><span class="id">P4</span><h3>Mass–spring chain dynamic stiffness</h3><span class="badge">mechanical / resonant</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=n · m=2n+2 · degree=2 · tridiagonal</div>
+  <div class="formula">Mass i has parameter mᵢ. Springs k₀,…,kₙ connect the chain to its neighbours/walls.
+A(z) = K(k) − z M(m)
+A[i,i]   = kᵢ₋₁ + kᵢ − z mᵢ
+A[i,i+1] = A[i+1,i] = −kᵢ
+b = e₁.</div>
+  <p><strong>Parameters.</strong> z (squared frequency), masses m₁,…,mₙ, springs k₀,…,kₙ.</p>
+  <p><strong>Why use it.</strong> It is another degree-2 sparse family, but with physically meaningful singular parameter hypersurfaces (resonances). Those singular probes should simply be rejected by the black box, making this a good test of robust probe handling.</p>
+</section>
+
+<section class="system" id="P5">
+  <div class="syshead"><span class="id">P5</span><h3>Birth–death Markov-chain reachability</h3><span class="badge">probability / many params</span><a class="toplink" href="#top">top</a></div>
+  <div class="meta">N=n · m=2n · degree=1 · tridiagonal</div>
+  <div class="formula">States 1,…,n are transient; 0 and n+1 are absorbing.
+At state i: move right with pᵢ, left with qᵢ, stay with 1−pᵢ−qᵢ.
+
+A[i,i]   = pᵢ + qᵢ
+A[i,i+1] = −pᵢ       (i&lt;n)
+A[i,i−1] = −qᵢ       (i&gt;1)
+b = [0,…,0,pₙ]^T.</div>
+  <p><strong>Unknown.</strong> xᵢ is the probability of reaching n+1 before 0 from state i.</p>
+  <p><strong>Why use it.</strong> This is a scalable application in which both A and b are polynomial in the parameters. It gives 2n interpolation variables while keeping every numerical probe tridiagonal.</p>
+</section>
+
+<hr>
+
+<h2 id="protocol">Suggested benchmark protocol</h2>
+<div class="box protocol">
+  <p><strong>1. Use the same finite-field black box for every family.</strong> Evaluate every parameter modulo p, build <code>[A|b]</code>, and solve the numerical system. Reject a probe only when the evaluated matrix is singular or the modular solve fails.</p>
+  <p><strong>2. Keep the right-hand side fixed.</strong> For S1–S6 and R1–R3 use <code>b=[1,2,...,N]^T</code>. Do not introduce n extra RHS parameters unless that is the experiment you explicitly want.</p>
+  <p><strong>3. Separate the scaling questions.</strong> Use P2 or S4 for <em>matrix-size scaling</em>; S2/S5/S6 for <em>parameter-count scaling</em>; R2/P3/P4 for <em>input-degree scaling</em>; and S1/P1 for <em>rational-output complexity</em>.</p>
+  <p><strong>4. Record more than wall time.</strong> At minimum record N, m, input degree, nnz(A), number of black-box probes, number of rejected/singular probes, time in modular solves, time in univariate reconstruction, time in multivariate reconstruction, and total time.</p>
+  <p><strong>5. Verify the reconstructed answer.</strong> Substitute at one or more fresh random parameter points and check <code>A(α)x(α)=b(α) mod p</code> using points that were not used during reconstruction.</p>
+</div>
+
+<h3>Recommended first benchmark suite</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>purpose</th><th>family</th><th>sizes</th><th>what it tells you</th></tr></thead>
+<tbody>
+<tr><td>dense baseline</td><td>S1</td><td>n=8,12,16,20</td><td>direct continuation of the symmetric Toeplitz experiments</td></tr>
+<tr><td>large N / fixed m</td><td>S4, w=2</td><td>n=50,100,200</td><td>whether repeated numerical solves dominate when interpolation dimension stays small</td></tr>
+<tr><td>large N / tiny m</td><td>P2</td><td>q=8,12,16,20 (N=64,144,256,400)</td><td>cleanest matrix-dimension scaling curve</td></tr>
+<tr><td>hard multivariate output</td><td>P1</td><td>q=4,5,6</td><td>how the algorithm behaves when the denominator support grows very rapidly</td></tr>
+<tr><td>degree-2 input</td><td>R2</td><td>q=6,8,10</td><td>effect of higher-degree polynomial matrix entries</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box warning">
+<strong>Intentionally omitted from the old page:</strong> Cauchy/generalized Hilbert families (rational matrix entries),
+small fixed 2×2 or 3×3 application sketches, singular kernel systems, and Vandermonde-as-a-benchmark. Vandermonde is useful inside the reconstruction algorithm,
+but it is a poor primary end-to-end test here because its inverse is unusually explicit and it overlaps with the interpolation backend itself.
+</div>
+
+<hr>
+
+<h2 id="refs">References and provenance</h2>
+<ol class="refs">
+  <li>J. Verschelde, <a href="https://homepages.math.uic.edu/~jan/demo.html">The database of polynomial systems</a>. This page borrows the database-style organization (short descriptions, characteristic numbers, and benchmark notes), not the nonlinear PHCpack test systems themselves.</li>
+  <li>A. Jinadu and M. Monagan, <a href="https://www.cecm.sfu.ca/CAG/papers/AyoolaCASC23.pdf">Solving Parametric Linear Systems using Sparse Rational Function Interpolation</a>, CASC 2023. Their problem setting is a full-rank polynomial matrix A(y) and polynomial b(y), with finite-field black-box solves followed by rational-function interpolation.</li>
+  <li>The same CASC work reports real benchmark systems with up to 66 equations and dozens of parameters, demonstrating that the target workload is not limited to tiny symbolic systems. The families above are formula-generated so that size and parameter count can be swept reproducibly.</li>
+</ol>
+
+<footer>
+Last updated 2026-08-08. All listed systems are intended to be generated from their formulas; benchmark sizes are starting points, not limits.
+</footer>
+
+</main>
+</body>
+</html>
