@@ -1,206 +1,382 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>Parametric Linear Systems DB</title>
-<meta name="description" content="A database containing parametric polynomial linear systems that can be solved 
-  efficiently using the package <a href="https://www.cecm.sfu.ca/~mmonagan/code/KYsolve/">KYSolve</a>.">
+<meta content="A database of parametric polynomial linear systems for benchmarking KYSolve and rational reconstruction algorithms." name="description"/>
 <style>
   :root{
-    --ink:#111;
-    --muted:#555;
-    --line:#b9b9b9;
-    --soft:#f4f4f4;
-    --link:#0645ad;
-    --good:#f0f7f0;
-    --warn:#fff8e8;
-    --max:1120px;
+    --bg:#f6f8fb;
+    --surface:#ffffff;
+    --surface-2:#f8fafc;
+    --ink:#182230;
+    --muted:#637083;
+    --line:#dfe5ec;
+    --line-strong:#cbd5e1;
+    --accent:#2563eb;
+    --accent-dark:#1d4ed8;
+    --accent-soft:#eff6ff;
+    --green-soft:#eefbf3;
+    --green-line:#b9e6c9;
+    --amber-soft:#fff8e8;
+    --amber-line:#f4d58d;
+    --code:#111827;
+    --code-ink:#e5edf7;
+    --shadow:0 10px 30px rgba(15,23,42,.06);
+    --radius:16px;
+    --max:1200px;
   }
+
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;scroll-padding-top:24px}
   body{
     margin:0;
-    padding:24px 18px 64px;
+    padding:40px 20px 72px;
     color:var(--ink);
-    background:white;
-    font-family:Georgia,"Times New Roman",serif;
-    font-size:16px;
-    line-height:1.46;
+    background:var(--bg);
+    font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15.5px;
+    line-height:1.65;
   }
+
   main{max-width:var(--max);margin:0 auto}
-  h1{font-size:28px;margin:0 0 12px;font-weight:700}
-  h2{font-size:21px;margin:34px 0 12px}
-  h3{font-size:18px;margin:0 0 5px}
+  h1,h2,h3{letter-spacing:-.025em;color:#0f172a}
+  h1{font-size:clamp(2rem,4vw,3.25rem);line-height:1.05;margin:0 0 18px;font-weight:750}
+  h2{font-size:1.55rem;margin:48px 0 16px;font-weight:720}
+  h3{font-size:1.05rem;margin:0;font-weight:700}
   p{margin:8px 0}
-  a{color:var(--link);text-decoration:none}
-  a:hover{text-decoration:underline}
-  code,.mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:.92em}
-  code{background:var(--soft);padding:1px 4px;border-radius:3px}
-  hr{border:0;border-top:1px solid #777;margin:24px 0}
-  .lead{max-width:92ch}
-  .small{font-size:14px;color:var(--muted)}
-  .index{
-    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
-    line-height:1.9;
-    margin:12px 0 2px;
+  a{color:var(--accent);text-decoration:none}
+  a:hover{color:var(--accent-dark)}
+  code,.mono,.meta,.id,.badge,.formula,td.num{
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
   }
-  .index a{white-space:nowrap}
+  code{
+    background:#eef2f7;
+    color:#1e293b;
+    padding:2px 6px;
+    border-radius:6px;
+    font-size:.9em;
+  }
+  hr{border:0;border-top:1px solid var(--line);margin:38px 0}
+
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:38px 40px 32px;
+    margin-bottom:34px;
+    border:1px solid var(--line);
+    border-radius:22px;
+    background:linear-gradient(135deg,#ffffff 0%,#f8fbff 58%,#eef5ff 100%);
+    box-shadow:var(--shadow);
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    width:240px;
+    height:240px;
+    right:-95px;
+    top:-115px;
+    border-radius:50%;
+    background:rgba(37,99,235,.08);
+    pointer-events:none;
+  }
+  .lead{max-width:850px;color:#475569;font-size:1.03rem;margin-bottom:20px}
+
+  .section-nav{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:22px;
+  }
+  .section-nav a{
+    display:inline-flex;
+    align-items:center;
+    min-height:36px;
+    padding:7px 12px;
+    border:1px solid #d8e1ec;
+    border-radius:999px;
+    background:rgba(255,255,255,.82);
+    color:#334155;
+    font-size:13px;
+    font-weight:650;
+    transition:.15s ease;
+  }
+  .section-nav a:hover{
+    border-color:#b8cdf7;
+    background:var(--accent-soft);
+    color:var(--accent-dark);
+    transform:translateY(-1px);
+  }
+
+  .small{font-size:13.5px;color:var(--muted)}
+
+  .index{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:6px;
+    margin:14px 0 22px;
+  }
+  .index br{display:none}
+  .index a{
+    display:block;
+    padding:9px 12px;
+    border:1px solid transparent;
+    border-radius:10px;
+    color:#334155;
+    background:transparent;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:13px;
+    line-height:1.4;
+    transition:.15s ease;
+  }
+  .index a:hover{
+    color:var(--accent-dark);
+    background:var(--surface);
+    border-color:var(--line);
+    box-shadow:0 4px 14px rgba(15,23,42,.05);
+    transform:translateY(-1px);
+  }
+
   .box{
     border:1px solid var(--line);
-    background:#fafafa;
-    padding:13px 16px;
-    margin:14px 0;
+    border-radius:var(--radius);
+    background:var(--surface);
+    padding:16px 18px;
+    margin:16px 0;
   }
-  .criteria{background:var(--good)}
-  .protocol{background:#f5f7fb}
-  .warning{background:var(--warn)}
-  .tablewrap{overflow-x:auto;margin:12px 0 18px}
-  table{border-collapse:collapse;width:100%;font-size:14px}
-  th,td{border:1px solid #999;padding:6px 8px;text-align:left;vertical-align:top}
-  th{background:#ededed;font-weight:700;white-space:nowrap}
-  td.num{text-align:right;font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;white-space:nowrap}
-  tr.core td:first-child{font-weight:700}
-  .legend{font-size:13px;color:var(--muted);margin-top:7px}
-  .system{
-    border-top:1px solid #aaa;
-    padding:17px 0 18px;
+  .criteria{background:var(--green-soft);border-color:var(--green-line)}
+  .protocol{background:var(--accent-soft);border-color:#c9dcff}
+  .warning{background:var(--amber-soft);border-color:var(--amber-line)}
+
+  .tablewrap{
+    overflow:auto;
+    margin:14px 0 22px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--surface);
+    box-shadow:0 4px 16px rgba(15,23,42,.035);
   }
-  .system:first-of-type{border-top:0}
-  .syshead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
-  .id{
-    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+  th,td{
+    border:0;
+    border-bottom:1px solid var(--line);
+    padding:10px 12px;
+    text-align:left;
+    vertical-align:top;
+  }
+  th{
+    position:sticky;
+    top:0;
+    z-index:1;
+    background:#f1f5f9;
+    color:#334155;
     font-weight:700;
-    min-width:36px;
+    white-space:nowrap;
+  }
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover td{background:#f8fbff}
+  td.num{text-align:right;white-space:nowrap;color:#334155}
+  tr.core td:first-child{font-weight:800;color:var(--accent-dark)}
+  .legend{font-size:12.5px;color:var(--muted);margin:8px 2px 0}
+
+  .system{
+    margin:14px 0;
+    padding:20px 22px 22px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--surface);
+    box-shadow:0 4px 18px rgba(15,23,42,.035);
+  }
+  .system:hover{border-color:#cdd8e5}
+  .syshead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:2px}
+  .id{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:42px;
+    height:28px;
+    padding:0 9px;
+    border-radius:8px;
+    color:#fff;
+    background:var(--accent);
+    font-size:12px;
+    font-weight:800;
   }
   .badge{
-    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
-    font-size:11px;
-    border:1px solid #aaa;
-    border-radius:10px;
-    padding:1px 7px;
-    background:#f7f7f7;
-    color:#333;
+    display:inline-flex;
+    align-items:center;
+    min-height:24px;
+    padding:3px 8px;
+    border:1px solid #dbe3ec;
+    border-radius:999px;
+    background:#f8fafc;
+    color:#64748b;
+    font-size:10.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.035em;
   }
-  .meta{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:12.5px;color:#444;margin:4px 0 9px}
+  .meta{font-size:12px;color:#7b8798;margin:6px 0 12px}
   .formula{
-    margin:9px 0;
-    padding:9px 12px;
-    background:#f8f8f8;
-    border-left:3px solid #777;
+    margin:12px 0 14px;
+    padding:15px 16px;
+    background:var(--code);
+    color:var(--code-ink);
+    border:1px solid #263244;
+    border-radius:12px;
     overflow-x:auto;
-    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
-    font-size:13px;
+    font-size:12.5px;
+    line-height:1.6;
     white-space:pre-wrap;
   }
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px}
-  .cols p{margin:5px 0}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .cols p{margin:4px 0}
   .rank{font-weight:700}
-  .toplink{font-size:12px;margin-left:auto}
-  .refs li{margin:6px 0}
-  footer{margin-top:34px;padding-top:13px;border-top:1px solid #999;font-size:13px;color:var(--muted)}
+  .toplink{
+    margin-left:auto;
+    padding:3px 8px;
+    border-radius:7px;
+    color:#7b8798;
+    font-size:11px;
+  }
+  .toplink:hover{background:#f1f5f9;color:var(--accent-dark)}
+
+  footer{
+    margin-top:44px;
+    padding:18px 4px 0;
+    border-top:1px solid var(--line);
+    color:#7b8798;
+    font-size:12.5px;
+  }
+
   @media(max-width:760px){
     body{padding:18px 12px 48px;font-size:15px}
-    h1{font-size:24px}
-    .cols{grid-template-columns:1fr;gap:0}
-    th,td{padding:5px 6px}
+    .hero{padding:26px 22px 22px;border-radius:18px}
+    h2{margin-top:38px}
+    .index{grid-template-columns:1fr}
+    .cols{grid-template-columns:1fr;gap:4px}
+    .system{padding:17px 16px 18px}
+    th,td{padding:9px 10px}
+    .toplink{margin-left:0}
   }
+
+
+  .matrix-example{
+    margin:14px 0 12px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:linear-gradient(180deg,#fbfcff 0%,#f7f9fc 100%);
+    overflow:hidden;
+  }
+  .matrix-example .example-label{
+    padding:8px 12px;
+    border-bottom:1px solid var(--line);
+    color:var(--muted);
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+  .matrix-example .math{
+    padding:14px 16px 10px;
+    overflow-x:auto;
+    text-align:center;
+    font-size:15px;
+  }
+  .matrix-example .example-note{
+    padding:0 14px 12px;
+    color:var(--muted);
+    font-size:12.5px;
+    text-align:center;
+  }
+  .matrix-example mjx-container[display="true"]{margin:.35em 0 !important;}
 </style>
-</head>
+<script>window.MathJax = {tex: {inlineMath: [["\\(","\\)"]], displayMath: [["\\[","\\]"]]}};</script><script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script></head>
 <body>
 <main id="top">
-
-<h1>Database of parametric polynomial linear systems</h1>
+<header class="hero">
+<h1>Parametric Linear Systems Database</h1>
 <p class="lead">
-This collection is for benchmarking algorithms that solve
-<code>A(y) x = b(y)</code> by evaluating the parameters in a finite field, solving the resulting
-numerical linear systems and then reconstructing the entries of <code>x</code> as multivariate rational functions.
+A benchmark collection for solving <code>A(y)x=b(y)</code> over finite fields and reconstructing multivariate rational solutions.
 </p>
-
 <div class="box criteria">
-  <strong>Inclusion rule.</strong> Every matrix family below is (i) linear in the unknown vector <code>x</code>
-  (ii) Potential to scale into a large matrix (iii) Generically nonsingular. Unless stated otherwise, we use the fixed integer vector
-  <code>b = [1,2,...,N]^T</code> or <code>b = [1,1,...,N]^T</code> as it adds no parameters and avoids some accidental symmetries.
+<strong>Inclusion rule.</strong> Each family is linear in <code>x</code>, scalable, and generically nonsingular. Unless stated otherwise, the right-hand side is a fixed integer vector with no symbolic parameters.
 </div>
-
-<p><strong>Sections:</strong>
-  <a href="#short">Overview of systems</a> |
-  <a href="#char">System ID's</a> |
-  <a href="#systems">System definitions</a> |
-  <a href="#protocol">Benchmark protocol</a> |
-  <a href="#refs">References</a>
-</p>
-
-<hr>
-
+<nav aria-label="Page sections" class="section-nav">
+<a href="#short">Overview</a>
+<a href="#char">System IDs</a>
+<a href="#systems">Definitions</a>
+<a href="#protocol">Benchmark protocol</a>
+</nav>
+</header>
+<hr/>
 <h2 id="short">Overview of systems</h2>
 <p class="small">S1–S6 are structured matrix families. R1–R3 are algebraic or resultant families. P1–P40 are scalable application motivated families.</p>
 <div class="index">
-<a href="#S1">S1 Symmetric Toeplitz</a><br>
-<a href="#S2">S2 General Toeplitz</a><br>
-<a href="#S3">S3 Hankel matrix</a><br>
-<a href="#S4">S4 Banded Toeplitz</a><br>
-<a href="#S5">S5 Block Toeplitz</a><br>
-<a href="#S6">S6 Generic tridiagonal matrix</a><br>
-
-<a href="#R1">R1 Sylvester resultant matrix</a><br>
-<a href="#R2">R2 Bézout matrix</a><br>
-<a href="#R3">R3 Companion resolvent</a><br>
-
-<a href="#P1">P1 Grounded weighted q×q grid Laplacian</a><br>
-<a href="#P2">P2 2-D convection diffusion reaction finite difference matrix</a><br>
-<a href="#P3">P3 RC ladder nodal admittance matrix</a><br>
-<a href="#P4">P4 Mass spring chain dynamic stiffness</a><br>
-<a href="#P5">P5 Birth death Markov chain reachability</a><br>
-<a href="#P6">P6 General grounded resistor network</a><br>
-<a href="#P7">P7 DC power flow network</a><br>
-<a href="#P8">P8 1-D variable conductivity diffusion</a><br>
-<a href="#P9">P9 2-D anisotropic variable coefficient diffusion</a><br>
-<a href="#P10">P10 Thermal model with parametric Robin-film coefficients</a><br>
-<a href="#P11">P11 Laplace domain heat model</a><br>
-<a href="#P12">P12 Single phase reservoir pressure</a><br>
-<a href="#P13">P13 Variable viscosity Stokes mixed finite element system</a><br>
-<a href="#P14">P14 Mixed Darcy saddle point system</a><br>
-<a href="#P15">P15 Acoustic frequency response system</a><br>
-<a href="#P16">P16 Linear elasticity stiffness system</a><br>
-<a href="#P17">P17 Structural FEM frequency response</a><br>
-<a href="#P18">P18 Damped structural dynamics affine dynamic stiffness</a><br>
-<a href="#P19">P19 RLC modified nodal analysis network</a><br>
-<a href="#P20">P20 Low frequency electromagnetic FEM</a><br>
-<a href="#P21">P21 Radiative transport</a><br>
-<a href="#P22">P22 Multigroup neutron diffusion fixed source system</a><br>
-<a href="#P23">P23 General absorbing Markov chain reachability</a><br>
-<a href="#P24">P24 Continuous time Markov mean first passage time</a><br>
-<a href="#P25">P25 CTMC stationary distribution with normalization</a><br>
-<a href="#P26">P26 PageRank linear system</a><br>
-<a href="#P27">P27 Fixed policy value system</a><br>
-<a href="#P28">P28 Pharmacokinetic network</a><br>
-<a href="#P29">P29 Leontief input output production network</a><br>
-<a href="#P30">P30 Sensor fusion normal equations</a><br>
-<a href="#P31">P31 Equality constrained quadratic program KKT system</a><br>
-<a href="#P32">P32 Regularized normal equation family</a><br>
-<a href="#P33">P33 Continuous time Lyapunov equation</a><br>
-<a href="#P34">P34 Sylvester matrix equation</a><br>
-<a href="#P35">P35 Parametric MOR</a><br>
-<a href="#P36">P36 Gaussian covariance component</a><br>
-<a href="#P37">P37 Penalized regression system</a><br>
-<a href="#P38">P38 Discretized Schrödinger resolvent</a><br>
-<a href="#P39">P39 Leslie population resolvent</a><br>
+<a href="#S1">S1 Symmetric Toeplitz</a><br/>
+<a href="#S2">S2 General Toeplitz</a><br/>
+<a href="#S3">S3 Hankel matrix</a><br/>
+<a href="#S4">S4 Banded Toeplitz</a><br/>
+<a href="#S5">S5 Block Toeplitz</a><br/>
+<a href="#S6">S6 Generic tridiagonal matrix</a><br/>
+<a href="#R1">R1 Sylvester resultant matrix</a><br/>
+<a href="#R2">R2 Bézout matrix</a><br/>
+<a href="#R3">R3 Companion resolvent</a><br/>
+<a href="#P1">P1 Grounded weighted q×q grid Laplacian</a><br/>
+<a href="#P2">P2 2-D convection diffusion reaction finite difference matrix</a><br/>
+<a href="#P3">P3 RC ladder nodal admittance matrix</a><br/>
+<a href="#P4">P4 Mass spring chain dynamic stiffness</a><br/>
+<a href="#P5">P5 Birth death Markov chain reachability</a><br/>
+<a href="#P6">P6 General grounded resistor network</a><br/>
+<a href="#P7">P7 DC power flow network</a><br/>
+<a href="#P8">P8 1-D variable conductivity diffusion</a><br/>
+<a href="#P9">P9 2-D anisotropic variable coefficient diffusion</a><br/>
+<a href="#P10">P10 Thermal model with parametric Robin-film coefficients</a><br/>
+<a href="#P11">P11 Laplace domain heat model</a><br/>
+<a href="#P12">P12 Single phase reservoir pressure</a><br/>
+<a href="#P13">P13 Variable viscosity Stokes mixed finite element system</a><br/>
+<a href="#P14">P14 Mixed Darcy saddle point system</a><br/>
+<a href="#P15">P15 Acoustic frequency response system</a><br/>
+<a href="#P16">P16 Linear elasticity stiffness system</a><br/>
+<a href="#P17">P17 Structural FEM frequency response</a><br/>
+<a href="#P18">P18 Damped structural dynamics affine dynamic stiffness</a><br/>
+<a href="#P19">P19 RLC modified nodal analysis network</a><br/>
+<a href="#P20">P20 Low frequency electromagnetic FEM</a><br/>
+<a href="#P21">P21 Radiative transport</a><br/>
+<a href="#P22">P22 Multigroup neutron diffusion fixed source system</a><br/>
+<a href="#P23">P23 General absorbing Markov chain reachability</a><br/>
+<a href="#P24">P24 Continuous time Markov mean first passage time</a><br/>
+<a href="#P25">P25 CTMC stationary distribution with normalization</a><br/>
+<a href="#P26">P26 PageRank linear system</a><br/>
+<a href="#P27">P27 Fixed policy value system</a><br/>
+<a href="#P28">P28 Pharmacokinetic network</a><br/>
+<a href="#P29">P29 Leontief input output production network</a><br/>
+<a href="#P30">P30 Sensor fusion normal equations</a><br/>
+<a href="#P31">P31 Equality constrained quadratic program KKT system</a><br/>
+<a href="#P32">P32 Regularized normal equation family</a><br/>
+<a href="#P33">P33 Continuous time Lyapunov equation</a><br/>
+<a href="#P34">P34 Sylvester matrix equation</a><br/>
+<a href="#P35">P35 Parametric MOR</a><br/>
+<a href="#P36">P36 Gaussian covariance component</a><br/>
+<a href="#P37">P37 Penalized regression system</a><br/>
+<a href="#P38">P38 Discretized Schrödinger resolvent</a><br/>
+<a href="#P39">P39 Leslie population resolvent</a><br/>
 <a href="#P40">P40 Quasi birth death queueing reachability</a>
 </div>
-
 <div class="box criteria">
   The applications above cover the major linear system domains represented in NIST Matrix Market and SuiteSparse/Oberwolfach, 
   plus parametric model reduction, PDE discretization, circuits, structures, power networks, stochastic processes, optimization, 
   control, statistics/ML, economics, nuclear and radiative transport and quantum models. 
 </div>
-
-  <hr>
+<hr/>
 <h2 id="char">System ID's</h2>
 <div class="tablewrap">
 <table aria-label="System ID's of benchmark families">
 <thead><tr><th>Sys. ID</th><th>Matrix family</th><th>Matrix dimension 'N'</th><th># No. of parameters 'm'</th>
-  <th>Max input degree</th><th>No. of nonzero entries</th><th>Recom. first input</th><th>Main app.</th></tr></thead>
+<th>Max input degree</th><th>No. of nonzero entries</th><th>Recom. first input</th><th>Main app.</th></tr></thead>
 <tbody>
 <tr class="core"><td>S1</td><td>Symmetric Toeplitz</td><td class="num">n</td><td class="num">n</td><td class="num">1</td><td class="num">n²</td><td>n=8,12,16,20</td><td>dense output complexity</td></tr>
 <tr class=""><td>S2</td><td>General Toeplitz</td><td class="num">n</td><td class="num">2n−1</td><td class="num">1</td><td class="num">n²</td><td>n=6,8,10,12</td><td>parameter-count growth</td></tr>
@@ -256,519 +432,676 @@ numerical linear systems and then reconstructing the entries of <code>x</code> a
 </div>
 <p class="legend"><strong>N</strong> is the number of unknowns/equations. <strong>m</strong> counts symbolic parameters only. Counts marked by graph/mesh quantities are topology dependent. “Max input degree” is total degree in the chosen independent benchmark parameters; several physical specializations intentionally identify affine dynamic parameters with products such as ω²m or sσ only after reconstruction.</p>
 <div class="box warning"><strong>Strong balanced first suite:</strong> S1, S4, P1, P2, P13, P19, P31, P35. These cover dense repeated-entry structure, large-N/fixed-m scaling, hard graph denominators, tiny-m PDE scaling, saddle points, circuit descriptors, optimization KKT matrices, and general model-reduction pencils.</div>
-<hr>
+<hr/>
 <h2 id="systems">System definitions</h2>
 <section class="system" id="S1">
-  <div class="syshead"><span class="id">S1</span><h3>Symmetric Toeplitz</h3><span class="badge">primary dense benchmark</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n · m=n · degree=1 · dense</div>
-  <div class="formula">A[i,j] = t[|i-j|],              1 ≤ i,j ≤ n
-b[i]   = i</div>
-  <div class="cols"><p><strong>Parameters.</strong> t₀,…,tₙ₋₁.</p><p><strong>Suggested sweep.</strong> n = 8, 12, 16, 20, then increase until probe count or reconstruction dominates.</p></div>
-  <p><strong>Why use it.</strong> This is the cleanest baseline for the whole database: the matrix is dense, every entry is linear in the parameters, the parameter count grows with n, and setting t₀=1 with all other tᵢ=0 gives the identity, so the family is generically nonsingular.</p>
+<div class="syshead"><span class="id">S1</span><h3>Symmetric Toeplitz</h3><span class="badge">primary dense benchmark</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n · m=n · degree=1 · dense</div>
+<div class="matrix-example"><div class="example-label">Example · n = 4</div><div class="math">\[
+A=\begin{bmatrix}
+t_0&amp;t_1&amp;t_2&amp;t_3\\
+t_1&amp;t_0&amp;t_1&amp;t_2\\
+t_2&amp;t_1&amp;t_0&amp;t_1\\
+t_3&amp;t_2&amp;t_1&amp;t_0
+\end{bmatrix},\qquad
+b=\begin{bmatrix}1\\2\\3\\4\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> t₀,…,tₙ₋₁.</p><p><strong>Suggested sweep.</strong> n = 8, 12, 16, 20, then increase until probe count or reconstruction dominates.</p></div>
+<p><strong>Why use it.</strong> This is the cleanest baseline for the whole database: the matrix is dense, every entry is linear in the parameters, the parameter count grows with n, and setting t₀=1 with all other tᵢ=0 gives the identity, so the family is generically nonsingular.</p>
 </section>
-
 <section class="system" id="S2">
-  <div class="syshead"><span class="id">S2</span><h3>General Toeplitz</h3><span class="badge">many parameters</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n · m=2n−1 · degree=1 · dense</div>
-  <div class="formula">A[i,j] = t[j-i],                −(n−1) ≤ j−i ≤ n−1
-b[i]   = i</div>
-  <p><strong>Parameters.</strong> t₋ₙ₊₁,…,t₋₁,t₀,t₁,…,tₙ₋₁.</p>
-  <p><strong>Why use it.</strong> It keeps the same dense Toeplitz geometry as S1 but roughly doubles the parameter count. Compare S1 and S2 at the same n to isolate the cost of additional variables in the reconstructed rational functions.</p>
+<div class="syshead"><span class="id">S2</span><h3>General Toeplitz</h3><span class="badge">many parameters</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n · m=2n−1 · degree=1 · dense</div>
+<div class="matrix-example"><div class="example-label">Example · n = 4</div><div class="math">\[
+A=\begin{bmatrix}
+t_0&amp;t_1&amp;t_2&amp;t_3\\
+t_{-1}&amp;t_0&amp;t_1&amp;t_2\\
+t_{-2}&amp;t_{-1}&amp;t_0&amp;t_1\\
+t_{-3}&amp;t_{-2}&amp;t_{-1}&amp;t_0
+\end{bmatrix},\qquad
+b=\begin{bmatrix}1\\2\\3\\4\end{bmatrix}.
+\]</div></div>
+<p><strong>Parameters.</strong> t₋ₙ₊₁,…,t₋₁,t₀,t₁,…,tₙ₋₁.</p>
+<p><strong>Why use it.</strong> It keeps the same dense Toeplitz geometry as S1 but roughly doubles the parameter count. Compare S1 and S2 at the same n to isolate the cost of additional variables in the reconstructed rational functions.</p>
 </section>
-
 <section class="system" id="S3">
-  <div class="syshead"><span class="id">S3</span><h3>Hankel</h3><span class="badge">dense structured</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n · m=2n−1 · degree=1 · dense</div>
-  <div class="formula">A[i,j] = h[i+j-2],              0 ≤ i+j−2 ≤ 2n−2
-b[i]   = i</div>
-  <p><strong>Parameters.</strong> h₀,…,h₂ₙ₋₂. Choosing hₙ₋₁=1 and all other hᵢ=0 gives the reversal permutation matrix, hence the determinant is not identically zero.</p>
-  <p><strong>Why use it.</strong> It has the same parameter count as S2 but a different repeated-entry pattern. This makes S2 versus S3 a useful structure comparison without changing n or m.</p>
+<div class="syshead"><span class="id">S3</span><h3>Hankel</h3><span class="badge">dense structured</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n · m=2n−1 · degree=1 · dense</div>
+<div class="matrix-example"><div class="example-label">Example · n = 4</div><div class="math">\[
+A=\begin{bmatrix}
+h_0&amp;h_1&amp;h_2&amp;h_3\\
+h_1&amp;h_2&amp;h_3&amp;h_4\\
+h_2&amp;h_3&amp;h_4&amp;h_5\\
+h_3&amp;h_4&amp;h_5&amp;h_6
+\end{bmatrix},\qquad
+b=\begin{bmatrix}1\\2\\3\\4\end{bmatrix}.
+\]</div></div>
+<p><strong>Parameters.</strong> h₀,…,h₂ₙ₋₂. Choosing hₙ₋₁=1 and all other hᵢ=0 gives the reversal permutation matrix, hence the determinant is not identically zero.</p>
+<p><strong>Why use it.</strong> It has the same parameter count as S2 but a different repeated-entry pattern. This makes S2 versus S3 a useful structure comparison without changing n or m.</p>
 </section>
-
 <section class="system" id="S4">
-  <div class="syshead"><span class="id">S4</span><h3>Banded Toeplitz</h3><span class="badge">large-N benchmark</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n · m=2w+1 · degree=1 · sparse</div>
-  <div class="formula">A[i,j] = t[j-i]   if |j-i| ≤ w,
-         = 0        otherwise.
-b[i]   = i</div>
-  <p><strong>Parameters.</strong> t₋w,…,t₀,…,t_w. Treat bandwidth w as a second benchmark knob.</p>
-  <p><strong>Why use it.</strong> This is the simplest way to make the numerical solve large without simultaneously making the interpolation dimension large. Hold w fixed and grow n. It is therefore one of the most important complements to S1.</p>
+<div class="syshead"><span class="id">S4</span><h3>Banded Toeplitz</h3><span class="badge">large-N benchmark</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n · m=2w+1 · degree=1 · sparse</div>
+<div class="matrix-example"><div class="example-label">Example · n = 5, w = 1</div><div class="math">\[
+A=\begin{bmatrix}
+t_0&amp;t_1&amp;0&amp;0&amp;0\\
+t_{-1}&amp;t_0&amp;t_1&amp;0&amp;0\\
+0&amp;t_{-1}&amp;t_0&amp;t_1&amp;0\\
+0&amp;0&amp;t_{-1}&amp;t_0&amp;t_1\\
+0&amp;0&amp;0&amp;t_{-1}&amp;t_0
+\end{bmatrix}.
+\]</div></div>
+<p><strong>Parameters.</strong> t₋w,…,t₀,…,t_w. Treat bandwidth w as a second benchmark knob.</p>
+<p><strong>Why use it.</strong> This is the simplest way to make the numerical solve large without simultaneously making the interpolation dimension large. Hold w fixed and grow n. It is therefore one of the most important complements to S1.</p>
 </section>
-
 <section class="system" id="S5">
-  <div class="syshead"><span class="id">S5</span><h3>Block Toeplitz with Toeplitz blocks (BTTB)</h3><span class="badge">2-D structured</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=q² · m=(2q−1)² · degree=1 · dense</div>
-  <div class="formula">Index rows/columns by grid pairs (r,c),(u,v) ∈ {0,…,q−1}².
-A[(r,c),(u,v)] = τ[u-r, v-c].
-b[k] = k+1.</div>
-  <p><strong>Parameters.</strong> One τ<sub>a,b</sub> for each offset −(q−1)≤a,b≤q−1.</p>
-  <p><strong>Why use it.</strong> This is the natural two-dimensional analogue of general Toeplitz. The matrix dimension grows quadratically in q while the number of shift parameters also grows on the order of N. It is a strong dense many-parameter stress test.</p>
+<div class="syshead"><span class="id">S5</span><h3>Block Toeplitz with Toeplitz blocks (BTTB)</h3><span class="badge">2-D structured</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=q² · m=(2q−1)² · degree=1 · dense</div>
+<div class="matrix-example"><div class="example-label">Example · q = 2</div><div class="math">\[
+A=\begin{bmatrix}
+\tau_{0,0}&amp;\tau_{0,1}&amp;\tau_{1,0}&amp;\tau_{1,1}\\
+\tau_{0,-1}&amp;\tau_{0,0}&amp;\tau_{1,-1}&amp;\tau_{1,0}\\
+\tau_{-1,0}&amp;\tau_{-1,1}&amp;\tau_{0,0}&amp;\tau_{0,1}\\
+\tau_{-1,-1}&amp;\tau_{-1,0}&amp;\tau_{0,-1}&amp;\tau_{0,0}
+\end{bmatrix}.
+\]</div><div class="example-note">Rows and columns are ordered by the 2×2 grid points.</div></div>
+<p><strong>Parameters.</strong> One τ<sub>a,b</sub> for each offset −(q−1)≤a,b≤q−1.</p>
+<p><strong>Why use it.</strong> This is the natural two-dimensional analogue of general Toeplitz. The matrix dimension grows quadratically in q while the number of shift parameters also grows on the order of N. It is a strong dense many-parameter stress test.</p>
 </section>
-
 <section class="system" id="S6">
-  <div class="syshead"><span class="id">S6</span><h3>Generic tridiagonal / continuant family</h3><span class="badge">sparse many-parameter</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n · m=3n−2 · degree=1 · sparse</div>
-  <div class="formula">A[i,i]   = d[i]
-A[i,i+1] = u[i]      (1 ≤ i &lt; n)
-A[i+1,i] = l[i]      (1 ≤ i &lt; n)
-all other entries = 0
-b[i] = i</div>
-  <p><strong>Parameters.</strong> d₁,…,dₙ, u₁,…,uₙ₋₁, l₁,…,lₙ₋₁.</p>
-  <p><strong>Why use it.</strong> Parameter count is very high relative to matrix sparsity. It separates “many interpolation variables” from “expensive dense finite-field solve.” The determinant obeys the standard continuant recurrence, so this is also easy to validate independently.</p>
+<div class="syshead"><span class="id">S6</span><h3>Generic tridiagonal / continuant family</h3><span class="badge">sparse many-parameter</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n · m=3n−2 · degree=1 · sparse</div>
+<div class="matrix-example"><div class="example-label">Example · n = 4</div><div class="math">\[
+A=\begin{bmatrix}
+d_1&amp;u_1&amp;0&amp;0\\
+l_1&amp;d_2&amp;u_2&amp;0\\
+0&amp;l_2&amp;d_3&amp;u_3\\
+0&amp;0&amp;l_3&amp;d_4
+\end{bmatrix}.
+\]</div></div>
+<p><strong>Parameters.</strong> d₁,…,dₙ, u₁,…,uₙ₋₁, l₁,…,lₙ₋₁.</p>
+<p><strong>Why use it.</strong> Parameter count is very high relative to matrix sparsity. It separates “many interpolation variables” from “expensive dense finite-field solve.” The determinant obeys the standard continuant recurrence, so this is also easy to validate independently.</p>
 </section>
-
 <section class="system" id="R1">
-  <div class="syshead"><span class="id">R1</span><h3>Sylvester resultant matrix</h3><span class="badge">algebraic benchmark</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=r+s · m=r+s+2 · degree=1 · structured</div>
-  <div class="formula">f(z) = a₀ + a₁z + ··· + aᵣzʳ
-g(z) = b₀ + b₁z + ··· + bₛzˢ
-A     = Sylvester(f,g) ∈ Z[a,b]^(r+s)×(r+s)
-b[k]  = k</div>
-  <p><strong>Parameters.</strong> a₀,…,aᵣ,b₀,…,bₛ. For a balanced sweep use r=s.</p>
-  <p><strong>Why use it.</strong> The determinant is the resultant of two generic polynomials. This gives a very natural algebraic denominator rather than an arbitrary random one, and the family scales directly by increasing the polynomial degrees.</p>
+<div class="syshead"><span class="id">R1</span><h3>Sylvester resultant matrix</h3><span class="badge">algebraic benchmark</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=r+s · m=r+s+2 · degree=1 · structured</div>
+<div class="matrix-example"><div class="example-label">Example · r = s = 2</div><div class="math">\[
+A=\operatorname{Sylv}(f,g)=
+\begin{bmatrix}
+a_2&amp;a_1&amp;a_0&amp;0\\
+0&amp;a_2&amp;a_1&amp;a_0\\
+b_2&amp;b_1&amp;b_0&amp;0\\
+0&amp;b_2&amp;b_1&amp;b_0
+\end{bmatrix}.
+\]</div><div class="example-note">Here \(f=a_0+a_1z+a_2z^2\) and \(g=b_0+b_1z+b_2z^2\).</div></div>
+<p><strong>Parameters.</strong> a₀,…,aᵣ,b₀,…,bₛ. For a balanced sweep use r=s.</p>
+<p><strong>Why use it.</strong> The determinant is the resultant of two generic polynomials. This gives a very natural algebraic denominator rather than an arbitrary random one, and the family scales directly by increasing the polynomial degrees.</p>
 </section>
-
 <section class="system" id="R2">
-  <div class="syshead"><span class="id">R2</span><h3>Bézout matrix of two generic polynomials</h3><span class="badge">degree-2 input</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=q · m=2q+2 · degree=2 · dense</div>
-  <div class="formula">f(z)=Σ(i=0..q) aᵢ zⁱ,     g(z)=Σ(i=0..q) bᵢ zⁱ
-(f(x)g(y) − f(y)g(x))/(x−y)
-     = Σ(i=1..q) Σ(j=1..q) B[i,j] x^(i−1) y^(j−1)
-A = B(f,g),     b[k]=k</div>
-  <p><strong>Why use it.</strong> Unlike most families here, the matrix entries themselves are bilinear in the parameters. This is a controlled test of the effect of input degree 2 while retaining a canonical resultant structure.</p>
+<div class="syshead"><span class="id">R2</span><h3>Bézout matrix of two generic polynomials</h3><span class="badge">degree-2 input</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=q · m=2q+2 · degree=2 · dense</div>
+<div class="matrix-example"><div class="example-label">Example · q = 2</div><div class="math">\[
+B(f,g)=\begin{bmatrix}
+a_1b_0-a_0b_1 &amp; a_2b_0-a_0b_2\\
+a_2b_0-a_0b_2 &amp; a_2b_1-a_1b_2
+\end{bmatrix}.
+\]</div></div>
+<p><strong>Why use it.</strong> Unlike most families here, the matrix entries themselves are bilinear in the parameters. This is a controlled test of the effect of input degree 2 while retaining a canonical resultant structure.</p>
 </section>
-
 <section class="system" id="R3">
-  <div class="syshead"><span class="id">R3</span><h3>Companion resolvent</h3><span class="badge">large sparse control</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n · m=n+1 · degree=1 · sparse</div>
-  <div class="formula">f(z)=zⁿ+a[n−1]z^(n−1)+···+a₁z+a₀
-C = companion matrix of f
-A(s,a) = s I − C
-b[i] = i
-
-det(A)=f(s).</div>
-  <p><strong>Parameters.</strong> s,a₀,…,aₙ₋₁.</p>
-  <p><strong>Why use it.</strong> This is a deliberately structured control case: N can be pushed very high, the matrix has only O(N) nonzeros, and the exact denominator is known. It is useful for checking whether failures are caused by your reconstruction machinery rather than by an intrinsically difficult matrix family.</p>
+<div class="syshead"><span class="id">R3</span><h3>Companion resolvent</h3><span class="badge">large sparse control</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n · m=n+1 · degree=1 · sparse</div>
+<div class="matrix-example"><div class="example-label">Example · n = 4</div><div class="math">\[
+sI-C=\begin{bmatrix}
+s&amp;0&amp;0&amp;a_0\\
+-1&amp;s&amp;0&amp;a_1\\
+0&amp;-1&amp;s&amp;a_2\\
+0&amp;0&amp;-1&amp;s+a_3
+\end{bmatrix}.
+\]</div></div>
+<p><strong>Parameters.</strong> s,a₀,…,aₙ₋₁.</p>
+<p><strong>Why use it.</strong> This is a deliberately structured control case: N can be pushed very high, the matrix has only O(N) nonzeros, and the exact denominator is known. It is useful for checking whether failures are caused by your reconstruction machinery rather than by an intrinsically difficult matrix family.</p>
 </section>
-
 <section class="system" id="P1">
-  <div class="syshead"><span class="id">P1</span><h3>Grounded weighted q×q grid Laplacian</h3><span class="badge">graph / hard multivariate</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=q²−1 · m=2q(q−1) · degree=1 · nnz=≈ 5N</div>
-  <div class="formula">Let G be the q×q nearest-neighbour grid, with one parameter w[e] per edge.
-L[v,v] = Σ(e incident to v) w[e]
-L[u,v] = −w[{u,v}] if u and v are adjacent, else 0.
-A = L with one ground vertex row/column deleted.
-b = e_source.</div>
-  <div class="cols"><p><strong>Parameters.</strong> One independent edge weight for each of the 2q(q−1) grid edges.</p><p><strong>Suggested sweep.</strong> q=4,5,6,8.</p></div>
-  <p><strong>Why use it.</strong> The determinant of the grounded Laplacian is the weighted spanning-tree polynomial. This is an unusually hard output-complexity test despite the sparse five-point matrix.</p>
+<div class="syshead"><span class="id">P1</span><h3>Grounded weighted q×q grid Laplacian</h3><span class="badge">graph / hard multivariate</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=q²−1 · m=2q(q−1) · degree=1 · nnz=≈ 5N</div>
+<div class="matrix-example"><div class="example-label">Example · q = 2, one corner grounded</div><div class="math">\[
+A=\begin{bmatrix}
+w_1+w_2&amp;-w_1&amp;-w_2\\
+-w_1&amp;w_1+w_3&amp;0\\
+-w_2&amp;0&amp;w_2+w_4
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> One independent edge weight for each of the 2q(q−1) grid edges.</p><p><strong>Suggested sweep.</strong> q=4,5,6,8.</p></div>
+<p><strong>Why use it.</strong> The determinant of the grounded Laplacian is the weighted spanning-tree polynomial. This is an unusually hard output-complexity test despite the sparse five-point matrix.</p>
 </section>
-
 <section class="system" id="P2">
-  <div class="syshead"><span class="id">P2</span><h3>2-D convection–diffusion–reaction finite difference</h3><span class="badge">PDE / tiny parameter count</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=q² · m=3 · degree=1 · nnz=≈ 5N</div>
-  <div class="formula">On a q×q interior grid with Dirichlet boundary conditions use
-              north: −2+β
-west: −2−α   center: 8+2γ   east: −2+α
-              south: −2−β
-A=A_q(α,β,γ),    b=e_center.</div>
-  <div class="cols"><p><strong>Parameters.</strong> α is x-convection, β is y-convection, and γ is a reaction/shift parameter.</p><p><strong>Suggested sweep.</strong> q=8,12,16,20.</p></div>
-  <p><strong>Why use it.</strong> Only three interpolation variables are present no matter how large the grid becomes, so this isolates repeated finite-field solve cost from interpolation dimension.</p>
+<div class="syshead"><span class="id">P2</span><h3>2-D convection–diffusion–reaction finite difference</h3><span class="badge">PDE / tiny parameter count</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=q² · m=3 · degree=1 · nnz=≈ 5N</div>
+<div class="matrix-example"><div class="example-label">Example · q = 2</div><div class="math">\[
+A=\begin{bmatrix}
+c&amp;e&amp;s&amp;0\\
+w&amp;c&amp;0&amp;s\\
+n&amp;0&amp;c&amp;e\\
+0&amp;n&amp;w&amp;c
+\end{bmatrix},
+\quad
+\begin{aligned}
+c&amp;=8+2\gamma,\\ e&amp;=-2+\alpha,\quad w=-2-\alpha,\\ n&amp;=-2+\beta,\quad s=-2-\beta.
+\end{aligned}
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> α is x-convection, β is y-convection, and γ is a reaction/shift parameter.</p><p><strong>Suggested sweep.</strong> q=8,12,16,20.</p></div>
+<p><strong>Why use it.</strong> Only three interpolation variables are present no matter how large the grid becomes, so this isolates repeated finite-field solve cost from interpolation dimension.</p>
 </section>
-
 <section class="system" id="P3">
-  <div class="syshead"><span class="id">P3</span><h3>RC ladder nodal admittance</h3><span class="badge">circuits / tridiagonal</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n · m=2n+3 · degree=2 · nnz=3n−2</div>
-  <div class="formula">For edges i=1,…,n+1 define y_i = g_i + s c_i.
-A[i,i]   = y_i + y_{i+1}
-A[i,i+1] = A[i+1,i] = −y_{i+1}
-b=e_1.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Laplace parameter s, conductances g_i, and capacitances c_i.</p><p><strong>Suggested sweep.</strong> n=20,40,80,160.</p></div>
-  <p><strong>Why use it.</strong> A real transfer-function family with O(n) component parameters. Products s c_i make the entries polynomial of degree two while the numerical matrix stays tridiagonal.</p>
+<div class="syshead"><span class="id">P3</span><h3>RC ladder nodal admittance</h3><span class="badge">circuits / tridiagonal</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n · m=2n+3 · degree=2 · nnz=3n−2</div>
+<div class="matrix-example"><div class="example-label">Example · n = 3</div><div class="math">\[
+A=\begin{bmatrix}
+y_1+y_2&amp;-y_2&amp;0\\
+-y_2&amp;y_2+y_3&amp;-y_3\\
+0&amp;-y_3&amp;y_3+y_4
+\end{bmatrix},\qquad y_i=g_i+s c_i.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Laplace parameter s, conductances g_i, and capacitances c_i.</p><p><strong>Suggested sweep.</strong> n=20,40,80,160.</p></div>
+<p><strong>Why use it.</strong> A real transfer-function family with O(n) component parameters. Products s c_i make the entries polynomial of degree two while the numerical matrix stays tridiagonal.</p>
 </section>
-
 <section class="system" id="P4">
-  <div class="syshead"><span class="id">P4</span><h3>Mass–spring chain dynamic stiffness (affine reparameterization)</h3><span class="badge">mechanics / affine</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n · m=2n+1 · degree=1 · nnz=3n−2</div>
-  <div class="formula">Let k_1,…,k_{n+1} be spring parameters and d_i the inertial dynamic parameter.
-A[i,i]   = k_i + k_{i+1} − d_i
-A[i,i+1] = A[i+1,i] = −k_{i+1}
-b=e_1.
-Physical specialization: d_i = ω² m_i.</div>
-  <div class="cols"><p><strong>Parameters.</strong> k_1,…,k_{n+1}, d_1,…,d_n. The d_i are independent interpolation variables in the affine benchmark.</p><p><strong>Suggested sweep.</strong> n=20,40,80,160.</p></div>
-  <p><strong>Why use it.</strong> This keeps every matrix entry affine in the symbolic parameters while retaining the exact mass–spring dynamic-stiffness specialization after setting d_i=ω²m_i.</p>
+<div class="syshead"><span class="id">P4</span><h3>Mass–spring chain dynamic stiffness (affine reparameterization)</h3><span class="badge">mechanics / affine</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n · m=2n+1 · degree=1 · nnz=3n−2</div>
+<div class="matrix-example"><div class="example-label">Example · n = 3</div><div class="math">\[
+A=\begin{bmatrix}
+k_1+k_2-d_1&amp;-k_2&amp;0\\
+-k_2&amp;k_2+k_3-d_2&amp;-k_3\\
+0&amp;-k_3&amp;k_3+k_4-d_3
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> k_1,…,k_{n+1}, d_1,…,d_n. The d_i are independent interpolation variables in the affine benchmark.</p><p><strong>Suggested sweep.</strong> n=20,40,80,160.</p></div>
+<p><strong>Why use it.</strong> This keeps every matrix entry affine in the symbolic parameters while retaining the exact mass–spring dynamic-stiffness specialization after setting d_i=ω²m_i.</p>
 </section>
-
 <section class="system" id="P5">
-  <div class="syshead"><span class="id">P5</span><h3>Birth–death Markov-chain reachability</h3><span class="badge">probability / tridiagonal</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n · m=2n · degree=1 · nnz=3n−2</div>
-  <div class="formula">States 1,…,n are transient; 0 and n+1 are absorbing.
-A[i,i]   = p_i + q_i
-A[i,i+1] = −p_i       (i&lt;n)
-A[i,i−1] = −q_i       (i&gt;1)
-b=[0,…,0,p_n]^T.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Birth/right probabilities p_i and death/left probabilities q_i.</p><p><strong>Suggested sweep.</strong> n=20,40,80,160.</p></div>
-  <p><strong>Why use it.</strong> The unknowns are hitting probabilities. Both A and b are affine in 2n parameters and every finite-field solve is tridiagonal.</p>
+<div class="syshead"><span class="id">P5</span><h3>Birth–death Markov-chain reachability</h3><span class="badge">probability / tridiagonal</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n · m=2n · degree=1 · nnz=3n−2</div>
+<div class="matrix-example"><div class="example-label">Example · n = 3</div><div class="math">\[
+A=\begin{bmatrix}
+p_1+q_1&amp;-p_1&amp;0\\
+-q_2&amp;p_2+q_2&amp;-p_2\\
+0&amp;-q_3&amp;p_3+q_3
+\end{bmatrix},\qquad
+b=\begin{bmatrix}0\\0\\p_3\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Birth/right probabilities p_i and death/left probabilities q_i.</p><p><strong>Suggested sweep.</strong> n=20,40,80,160.</p></div>
+<p><strong>Why use it.</strong> The unknowns are hitting probabilities. Both A and b are affine in 2n parameters and every finite-field solve is tridiagonal.</p>
 </section>
-
 <section class="system" id="P6">
-  <div class="syshead"><span class="id">P6</span><h3>General grounded resistor / conductance network</h3><span class="badge">circuits / graphs</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=|V|−1 · m=|E| · degree=1 · nnz=O(|E|)</div>
-  <div class="formula">Choose an oriented incidence matrix B and one conductance g_e per edge.
-L(g)=B^T diag(g_e) B.
-Delete one reference-node row/column: A=L_ground(g).
-A v = i.</div>
-  <div class="cols"><p><strong>Parameters.</strong> One conductance g_e per graph edge.</p><p><strong>Suggested sweep.</strong> paths, trees, expanders, random sparse graphs.</p></div>
-  <p><strong>Why use it.</strong> This is Kirchhoff nodal analysis in its most general scalable form. Varying topology while keeping the same edge-count scaling separates graph structure from parameter count.</p>
+<div class="syshead"><span class="id">P6</span><h3>General grounded resistor / conductance network</h3><span class="badge">circuits / graphs</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=|V|−1 · m=|E| · degree=1 · nnz=O(|E|)</div>
+<div class="matrix-example"><div class="example-label">Example · 3 free nodes</div><div class="math">\[
+A=\begin{bmatrix}
+g_{10}+g_{12}+g_{13}&amp;-g_{12}&amp;-g_{13}\\
+-g_{12}&amp;g_{20}+g_{12}+g_{23}&amp;-g_{23}\\
+-g_{13}&amp;-g_{23}&amp;g_{30}+g_{13}+g_{23}
+\end{bmatrix}.
+\]</div><div class="example-note">\(g_{i0}\) denotes a conductance from node \(i\) to the grounded node.</div></div>
+<div class="cols"><p><strong>Parameters.</strong> One conductance g_e per graph edge.</p><p><strong>Suggested sweep.</strong> paths, trees, expanders, random sparse graphs.</p></div>
+<p><strong>Why use it.</strong> This is Kirchhoff nodal analysis in its most general scalable form. Varying topology while keeping the same edge-count scaling separates graph structure from parameter count.</p>
 </section>
-
 <section class="system" id="P7">
-  <div class="syshead"><span class="id">P7</span><h3>DC power-flow network</h3><span class="badge">power systems / Laplacian</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n_bus−1 · m=n_line · degree=1 · nnz=O(n_line)</div>
-  <div class="formula">Let C be the branch–bus incidence matrix after choosing a slack bus.
-B_bus(b)=C^T diag(b_ℓ) C.
-B_bus(b) θ = P.</div>
-  <div class="cols"><p><strong>Parameters.</strong> One branch susceptance b_ℓ per transmission line; P is a fixed injection vector.</p><p><strong>Suggested sweep.</strong> radial, mesh, IEEE-like synthetic grids.</p></div>
-  <p><strong>Why use it.</strong> The DC approximation produces a grounded weighted network matrix. It is algebraically close to P6 but is worth retaining as a power-system application with realistic sparse graph topologies.</p>
+<div class="syshead"><span class="id">P7</span><h3>DC power-flow network</h3><span class="badge">power systems / Laplacian</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n_bus−1 · m=n_line · degree=1 · nnz=O(n_line)</div>
+<div class="matrix-example"><div class="example-label">Example · 3 non-slack buses</div><div class="math">\[
+B_{\mathrm{bus}}=\begin{bmatrix}
+b_{10}+b_{12}+b_{13}&amp;-b_{12}&amp;-b_{13}\\
+-b_{12}&amp;b_{20}+b_{12}+b_{23}&amp;-b_{23}\\
+-b_{13}&amp;-b_{23}&amp;b_{30}+b_{13}+b_{23}
+\end{bmatrix}.
+\]</div><div class="example-note">Bus 0 is the slack bus.</div></div>
+<div class="cols"><p><strong>Parameters.</strong> One branch susceptance b_ℓ per transmission line; P is a fixed injection vector.</p><p><strong>Suggested sweep.</strong> radial, mesh, IEEE-like synthetic grids.</p></div>
+<p><strong>Why use it.</strong> The DC approximation produces a grounded weighted network matrix. It is algebraically close to P6 but is worth retaining as a power-system application with realistic sparse graph topologies.</p>
 </section>
-
 <section class="system" id="P8">
-  <div class="syshead"><span class="id">P8</span><h3>1-D variable-conductivity diffusion / heat equation</h3><span class="badge">PDE / tridiagonal</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n · m=n+1 · degree=1 · nnz=3n−2</div>
-  <div class="formula">With face conductivities κ_1,…,κ_{n+1}:
-A[i,i]   = κ_i + κ_{i+1}
-A[i,i−1] = −κ_i       (i&gt;1)
-A[i,i+1] = −κ_{i+1}   (i&lt;n)
-A u = f, with Dirichlet boundaries.</div>
-  <div class="cols"><p><strong>Parameters.</strong> One conductivity/transmissibility parameter per cell face.</p><p><strong>Suggested sweep.</strong> n=50,100,200,400.</p></div>
-  <p><strong>Why use it.</strong> A canonical variable-coefficient elliptic PDE with an affine tridiagonal stiffness matrix. It is the PDE analogue of a weighted path graph.</p>
+<div class="syshead"><span class="id">P8</span><h3>1-D variable-conductivity diffusion / heat equation</h3><span class="badge">PDE / tridiagonal</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n · m=n+1 · degree=1 · nnz=3n−2</div>
+<div class="matrix-example"><div class="example-label">Example · n = 3</div><div class="math">\[
+A=\begin{bmatrix}
+\kappa_1+\kappa_2&amp;-\kappa_2&amp;0\\
+-\kappa_2&amp;\kappa_2+\kappa_3&amp;-\kappa_3\\
+0&amp;-\kappa_3&amp;\kappa_3+\kappa_4
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> One conductivity/transmissibility parameter per cell face.</p><p><strong>Suggested sweep.</strong> n=50,100,200,400.</p></div>
+<p><strong>Why use it.</strong> A canonical variable-coefficient elliptic PDE with an affine tridiagonal stiffness matrix. It is the PDE analogue of a weighted path graph.</p>
 </section>
-
 <section class="system" id="P9">
-  <div class="syshead"><span class="id">P9</span><h3>2-D anisotropic variable-coefficient diffusion</h3><span class="badge">PDE / many local coefficients</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=q² · m=2q(q+1) · degree=1 · nnz=≈ 5N</div>
-  <div class="formula">On each horizontal face use a_{i,j+1/2}; on each vertical face use b_{i+1/2,j}.
-A[k,k] = sum of the four incident face coefficients
-A[k,k_E]=−a_E, A[k,k_W]=−a_W,
-A[k,k_N]=−b_N, A[k,k_S]=−b_S.
-Homogeneous Dirichlet boundary values are absorbed into the diagonal.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Independent horizontal and vertical face diffusion coefficients, including boundary faces.</p><p><strong>Suggested sweep.</strong> q=4,6,8,10.</p></div>
-  <p><strong>Why use it.</strong> A finite-volume/finite-difference diffusion operator with O(N) symbolic coefficients and a five-point sparse pattern. It is a natural local-material uncertainty benchmark.</p>
+<div class="syshead"><span class="id">P9</span><h3>2-D anisotropic variable-coefficient diffusion</h3><span class="badge">PDE / many local coefficients</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=q² · m=2q(q+1) · degree=1 · nnz=≈ 5N</div>
+<div class="matrix-example"><div class="example-label">Example · q = 2</div><div class="math">\[
+A=\begin{bmatrix}
+d_1&amp;-h_1&amp;-v_1&amp;0\\
+-h_1&amp;d_2&amp;0&amp;-v_2\\
+-v_1&amp;0&amp;d_3&amp;-h_2\\
+0&amp;-v_2&amp;-h_2&amp;d_4
+\end{bmatrix}.
+\]</div><div class="example-note">Each \(d_i\) is the sum of the horizontal and vertical face coefficients incident to that cell.</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Independent horizontal and vertical face diffusion coefficients, including boundary faces.</p><p><strong>Suggested sweep.</strong> q=4,6,8,10.</p></div>
+<p><strong>Why use it.</strong> A finite-volume/finite-difference diffusion operator with O(N) symbolic coefficients and a five-point sparse pattern. It is a natural local-material uncertainty benchmark.</p>
 </section>
-
 <section class="system" id="P10">
-  <div class="syshead"><span class="id">P10</span><h3>Thermal model with parametric Robin / film coefficients</h3><span class="badge">thermal / real MOR benchmark</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=mesh DOFs · m=r · degree=1 · nnz=sparse FEM</div>
-  <div class="formula">K(h)=K_0 + Σ_{j=1}^r h_j R_j
-K(h) T = f
-where R_j is the boundary matrix for interface j.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Film/heat-transfer coefficients h_j on r boundary regions.</p><p><strong>Suggested sweep.</strong> refine mesh; r=3,6,12 interfaces.</p></div>
-  <p><strong>Why use it.</strong> This form occurs directly in boundary-condition-independent thermal models. The Oberwolfach/SuiteSparse model-reduction collection contains this exact affine parameter idea for chip and microthruster thermal models.</p>
+<div class="syshead"><span class="id">P10</span><h3>Thermal model with parametric Robin / film coefficients</h3><span class="badge">thermal / real MOR benchmark</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=mesh DOFs · m=r · degree=1 · nnz=sparse FEM</div>
+<div class="matrix-example"><div class="example-label">Example · N = 3, r = 2</div><div class="math">\[
+K(h)=\begin{bmatrix}
+k_{11}+h_1r^{(1)}_{11}+h_2r^{(2)}_{11}&amp;k_{12}+h_1r^{(1)}_{12}+h_2r^{(2)}_{12}&amp;k_{13}+h_1r^{(1)}_{13}+h_2r^{(2)}_{13}\\
+\ast&amp;k_{22}+h_1r^{(1)}_{22}+h_2r^{(2)}_{22}&amp;k_{23}+h_1r^{(1)}_{23}+h_2r^{(2)}_{23}\\
+\ast&amp;\ast&amp;k_{33}+h_1r^{(1)}_{33}+h_2r^{(2)}_{33}
+\end{bmatrix}.
+\]</div><div class="example-note">The \(\ast\) entries follow the corresponding assembled FEM symmetry.</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Film/heat-transfer coefficients h_j on r boundary regions.</p><p><strong>Suggested sweep.</strong> refine mesh; r=3,6,12 interfaces.</p></div>
+<p><strong>Why use it.</strong> This form occurs directly in boundary-condition-independent thermal models. The Oberwolfach/SuiteSparse model-reduction collection contains this exact affine parameter idea for chip and microthruster thermal models.</p>
 </section>
-
 <section class="system" id="P11">
-  <div class="syshead"><span class="id">P11</span><h3>Transient thermal descriptor / Laplace-domain heat model</h3><span class="badge">thermal / descriptor pencil</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=mesh DOFs · m=r+1 · degree=1 · nnz=sparse FEM</div>
-  <div class="formula">E dT/dt + K(κ)T = f,  K(κ)=K_0+Σ κ_j K_j.
-After Laplace transform:
-A(s,κ)=s E + K_0 + Σ κ_j K_j,
-A(s,κ) T(s)=f.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Frequency/Laplace parameter s and r material or boundary coefficients κ_j.</p><p><strong>Suggested sweep.</strong> N=10³–10⁵; r small.</p></div>
-  <p><strong>Why use it.</strong> Thermal MEMS and chip models routinely produce very large sparse capacity/conductivity matrix pairs. The affine descriptor form is ideal for a large-N parametric benchmark.</p>
+<div class="syshead"><span class="id">P11</span><h3>Transient thermal descriptor / Laplace-domain heat model</h3><span class="badge">thermal / descriptor pencil</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=mesh DOFs · m=r+1 · degree=1 · nnz=sparse FEM</div>
+<div class="matrix-example"><div class="example-label">Example · N = 3, one material parameter</div><div class="math">\[
+A(s,\kappa)=\begin{bmatrix}
+se_{11}+k_{11}^{(0)}+\kappa k_{11}^{(1)}&amp;se_{12}+k_{12}^{(0)}+\kappa k_{12}^{(1)}&amp;se_{13}+k_{13}^{(0)}+\kappa k_{13}^{(1)}\\
+se_{21}+k_{21}^{(0)}+\kappa k_{21}^{(1)}&amp;se_{22}+k_{22}^{(0)}+\kappa k_{22}^{(1)}&amp;se_{23}+k_{23}^{(0)}+\kappa k_{23}^{(1)}\\
+se_{31}+k_{31}^{(0)}+\kappa k_{31}^{(1)}&amp;se_{32}+k_{32}^{(0)}+\kappa k_{32}^{(1)}&amp;se_{33}+k_{33}^{(0)}+\kappa k_{33}^{(1)}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Frequency/Laplace parameter s and r material or boundary coefficients κ_j.</p><p><strong>Suggested sweep.</strong> N=10³–10⁵; r small.</p></div>
+<p><strong>Why use it.</strong> Thermal MEMS and chip models routinely produce very large sparse capacity/conductivity matrix pairs. The affine descriptor form is ideal for a large-N parametric benchmark.</p>
 </section>
-
 <section class="system" id="P12">
-  <div class="syshead"><span class="id">P12</span><h3>Darcy / groundwater / single-phase reservoir pressure</h3><span class="badge">porous media / graph-like</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=cells or nodes · m=faces + wells · degree=1 · nnz=≈ stencil size × N</div>
-  <div class="formula">For each face e let T_e be a transmissibility.
-A(T)=B^T diag(T_e) B + diag(w_i).
-A(T) p = q.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Face transmissibilities T_e and optional well/source linear coefficients w_i.</p><p><strong>Suggested sweep.</strong> 1-D, 2-D, layered grids.</p></div>
-  <p><strong>Why use it.</strong> Finite-volume Darcy pressure equations have the same conservation skeleton as a weighted Laplacian, but heterogeneous permeability and wells give a canonical petroleum/groundwater interpretation.</p>
+<div class="syshead"><span class="id">P12</span><h3>Darcy / groundwater / single-phase reservoir pressure</h3><span class="badge">porous media / graph-like</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=cells or nodes · m=faces + wells · degree=1 · nnz=≈ stencil size × N</div>
+<div class="matrix-example"><div class="example-label">Example · 3-cell chain</div><div class="math">\[
+A=\begin{bmatrix}
+T_{12}+w_1&amp;-T_{12}&amp;0\\
+-T_{12}&amp;T_{12}+T_{23}+w_2&amp;-T_{23}\\
+0&amp;-T_{23}&amp;T_{23}+w_3
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Face transmissibilities T_e and optional well/source linear coefficients w_i.</p><p><strong>Suggested sweep.</strong> 1-D, 2-D, layered grids.</p></div>
+<p><strong>Why use it.</strong> Finite-volume Darcy pressure equations have the same conservation skeleton as a weighted Laplacian, but heterogeneous permeability and wells give a canonical petroleum/groundwater interpretation.</p>
 </section>
-
 <section class="system" id="P13">
-  <div class="syshead"><span class="id">P13</span><h3>Variable-viscosity Stokes mixed finite-element system</h3><span class="badge">fluid / saddle point</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n_u+n_p−gauge · m=r · degree=1 · nnz=sparse block</div>
-  <div class="formula">A(ν)=Σ_{j=1}^r ν_j A_j.
-[ A(ν)  B^T ] [u] = [f]
-[  B      0  ] [p]   [0]
-Fix one pressure DOF or impose a mean-zero gauge.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Piecewise-constant viscosities ν_j on r regions.</p><p><strong>Suggested sweep.</strong> mesh refinements; r=1,4,16 regions.</p></div>
-  <p><strong>Why use it.</strong> The Stokes equations produce a canonical sparse saddle-point matrix. Parameterizing viscosity makes the velocity block affine while retaining the difficult indefinite block structure.</p>
+<div class="syshead"><span class="id">P13</span><h3>Variable-viscosity Stokes mixed finite-element system</h3><span class="badge">fluid / saddle point</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n_u+n_p−gauge · m=r · degree=1 · nnz=sparse block</div>
+<div class="matrix-example"><div class="example-label">Example · 2 velocity DOFs + 1 pressure DOF</div><div class="math">\[
+\begin{bmatrix}
+a_{11}(\nu)&amp;a_{12}(\nu)&amp;b_1\\
+a_{21}(\nu)&amp;a_{22}(\nu)&amp;b_2\\
+b_1&amp;b_2&amp;0
+\end{bmatrix}
+\begin{bmatrix}u_1\\u_2\\p\end{bmatrix}
+=\begin{bmatrix}f_1\\f_2\\0\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Piecewise-constant viscosities ν_j on r regions.</p><p><strong>Suggested sweep.</strong> mesh refinements; r=1,4,16 regions.</p></div>
+<p><strong>Why use it.</strong> The Stokes equations produce a canonical sparse saddle-point matrix. Parameterizing viscosity makes the velocity block affine while retaining the difficult indefinite block structure.</p>
 </section>
-
 <section class="system" id="P14">
-  <div class="syshead"><span class="id">P14</span><h3>Mixed Darcy saddle-point system</h3><span class="badge">porous media / saddle point</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n_flux+n_p · m=r · degree=1 · nnz=sparse block</div>
-  <div class="formula">M(ρ)=Σ_{j=1}^r ρ_j M_j, where ρ_j is inverse permeability.
-[ M(ρ)  B^T ] [u] = [f]
-[  B      0  ] [p]   [g].</div>
-  <div class="cols"><p><strong>Parameters.</strong> Inverse-permeability/material coefficients ρ_j.</p><p><strong>Suggested sweep.</strong> mesh refinements; r material regions.</p></div>
-  <p><strong>Why use it.</strong> This is the standard mixed finite-element Darcy saddle-point form and differs substantially from the primal pressure matrix P12.</p>
+<div class="syshead"><span class="id">P14</span><h3>Mixed Darcy saddle-point system</h3><span class="badge">porous media / saddle point</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n_flux+n_p · m=r · degree=1 · nnz=sparse block</div>
+<div class="matrix-example"><div class="example-label">Example · 2 flux DOFs + 1 pressure DOF</div><div class="math">\[
+\begin{bmatrix}
+m_{11}(\rho)&amp;m_{12}(\rho)&amp;b_1\\
+m_{21}(\rho)&amp;m_{22}(\rho)&amp;b_2\\
+b_1&amp;b_2&amp;0
+\end{bmatrix}
+\begin{bmatrix}u_1\\u_2\\p\end{bmatrix}
+=\begin{bmatrix}f_1\\f_2\\g\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Inverse-permeability/material coefficients ρ_j.</p><p><strong>Suggested sweep.</strong> mesh refinements; r material regions.</p></div>
+<p><strong>Why use it.</strong> This is the standard mixed finite-element Darcy saddle-point form and differs substantially from the primal pressure matrix P12.</p>
 </section>
-
 <section class="system" id="P15">
-  <div class="syshead"><span class="id">P15</span><h3>Helmholtz / acoustic frequency-response system</h3><span class="badge">waves / indefinite</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=mesh DOFs · m=r+1 · degree=1 · nnz=sparse FEM</div>
-  <div class="formula">K(κ)=K_0+Σ κ_j K_j.
-A(z,κ)=K(κ) − z M.
-A(z,κ) u = f.
-Physical specialization: z=k² or z=ω²/c².</div>
-  <div class="cols"><p><strong>Parameters.</strong> Squared-frequency/wavenumber z and r affine material coefficients κ_j.</p><p><strong>Suggested sweep.</strong> 1-D/2-D meshes; N=10²–10⁴.</p></div>
-  <p><strong>Why use it.</strong> The shifted stiffness–mass pencil is the canonical finite-element Helmholtz solve. It creates meaningful poles near resonances while remaining polynomial and affine in the chosen parameters.</p>
+<div class="syshead"><span class="id">P15</span><h3>Helmholtz / acoustic frequency-response system</h3><span class="badge">waves / indefinite</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=mesh DOFs · m=r+1 · degree=1 · nnz=sparse FEM</div>
+<div class="matrix-example"><div class="example-label">Example · N = 3</div><div class="math">\[
+A(z,\kappa)=\begin{bmatrix}
+k_{11}(\kappa)-zm_{11}&amp;k_{12}(\kappa)-zm_{12}&amp;k_{13}(\kappa)-zm_{13}\\
+k_{21}(\kappa)-zm_{21}&amp;k_{22}(\kappa)-zm_{22}&amp;k_{23}(\kappa)-zm_{23}\\
+k_{31}(\kappa)-zm_{31}&amp;k_{32}(\kappa)-zm_{32}&amp;k_{33}(\kappa)-zm_{33}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Squared-frequency/wavenumber z and r affine material coefficients κ_j.</p><p><strong>Suggested sweep.</strong> 1-D/2-D meshes; N=10²–10⁴.</p></div>
+<p><strong>Why use it.</strong> The shifted stiffness–mass pencil is the canonical finite-element Helmholtz solve. It creates meaningful poles near resonances while remaining polynomial and affine in the chosen parameters.</p>
 </section>
-
 <section class="system" id="P16">
-  <div class="syshead"><span class="id">P16</span><h3>Static truss / linear-elasticity stiffness system</h3><span class="badge">structures / FEM</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=free displacement DOFs · m=e or r · degree=1 · nnz=sparse FEM</div>
-  <div class="formula">Each element e contributes θ_e K_e.
-K(θ)=Σ_e θ_e K_e.
-After essential boundary conditions:
-K_free(θ) u = f.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Element axial stiffnesses EA/L, Young-modulus region coefficients, or other affine material stiffness parameters.</p><p><strong>Suggested sweep.</strong> chains, grids, trusses, 2-D meshes.</p></div>
-  <p><strong>Why use it.</strong> Finite-element assembly is naturally affine in element stiffness multipliers. This gives a genuine engineering family with vector-valued nodal DOFs and nontrivial sparse block structure.</p>
+<div class="syshead"><span class="id">P16</span><h3>Static truss / linear-elasticity stiffness system</h3><span class="badge">structures / FEM</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=free displacement DOFs · m=e or r · degree=1 · nnz=sparse FEM</div>
+<div class="matrix-example"><div class="example-label">Example · 3 free displacement DOFs</div><div class="math">\[
+K(\theta)=\begin{bmatrix}
+\sum_e\theta_e k^{(e)}_{11}&amp;\sum_e\theta_e k^{(e)}_{12}&amp;\sum_e\theta_e k^{(e)}_{13}\\
+\sum_e\theta_e k^{(e)}_{21}&amp;\sum_e\theta_e k^{(e)}_{22}&amp;\sum_e\theta_e k^{(e)}_{23}\\
+\sum_e\theta_e k^{(e)}_{31}&amp;\sum_e\theta_e k^{(e)}_{32}&amp;\sum_e\theta_e k^{(e)}_{33}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Element axial stiffnesses EA/L, Young-modulus region coefficients, or other affine material stiffness parameters.</p><p><strong>Suggested sweep.</strong> chains, grids, trusses, 2-D meshes.</p></div>
+<p><strong>Why use it.</strong> Finite-element assembly is naturally affine in element stiffness multipliers. This gives a genuine engineering family with vector-valued nodal DOFs and nontrivial sparse block structure.</p>
 </section>
-
 <section class="system" id="P17">
-  <div class="syshead"><span class="id">P17</span><h3>Structural FEM frequency response</h3><span class="badge">structures / resonant</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=free displacement DOFs · m=r+1 · degree=1 · nnz=sparse FEM</div>
-  <div class="formula">K(θ)=K_0+Σ θ_j K_j.
-A(z,θ)=K(θ) − z M.
-A(z,θ) u = f.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Squared frequency z and r stiffness/material parameters θ_j.</p><p><strong>Suggested sweep.</strong> mesh refinements.</p></div>
-  <p><strong>Why use it.</strong> Large structural models such as the Oberwolfach car-windscreen benchmark are solved repeatedly in exactly this shifted stiffness–mass form.</p>
+<div class="syshead"><span class="id">P17</span><h3>Structural FEM frequency response</h3><span class="badge">structures / resonant</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=free displacement DOFs · m=r+1 · degree=1 · nnz=sparse FEM</div>
+<div class="matrix-example"><div class="example-label">Example · N = 3</div><div class="math">\[
+A(z,\theta)=\begin{bmatrix}
+k_{11}(\theta)-zm_{11}&amp;k_{12}(\theta)-zm_{12}&amp;k_{13}(\theta)-zm_{13}\\
+k_{21}(\theta)-zm_{21}&amp;k_{22}(\theta)-zm_{22}&amp;k_{23}(\theta)-zm_{23}\\
+k_{31}(\theta)-zm_{31}&amp;k_{32}(\theta)-zm_{32}&amp;k_{33}(\theta)-zm_{33}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Squared frequency z and r stiffness/material parameters θ_j.</p><p><strong>Suggested sweep.</strong> mesh refinements.</p></div>
+<p><strong>Why use it.</strong> Large structural models such as the Oberwolfach car-windscreen benchmark are solved repeatedly in exactly this shifted stiffness–mass form.</p>
 </section>
-
 <section class="system" id="P18">
-  <div class="syshead"><span class="id">P18</span><h3>Damped structural dynamics affine dynamic stiffness</h3><span class="badge">structures / damping</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=free displacement DOFs · m=r+2 · degree=1 · nnz=sparse FEM</div>
-  <div class="formula">A(θ,d,z)=K_0+Σ θ_j K_j + d C + z M.
-A(θ,d,z)u=f.
-Physical specialization can set d=s and z=s² (with sign convention as required).</div>
-  <div class="cols"><p><strong>Parameters.</strong> r stiffness parameters plus independent damping shift d and inertial shift z.</p><p><strong>Suggested sweep.</strong> mesh refinements.</p></div>
-  <p><strong>Why use it.</strong> Treating d and z independently preserves an affine polynomial benchmark while representing the usual damped second-order dynamic stiffness after physical specialization.</p>
+<div class="syshead"><span class="id">P18</span><h3>Damped structural dynamics affine dynamic stiffness</h3><span class="badge">structures / damping</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=free displacement DOFs · m=r+2 · degree=1 · nnz=sparse FEM</div>
+<div class="matrix-example"><div class="example-label">Example · N = 3</div><div class="math">\[
+A=\begin{bmatrix}
+k_{11}(\theta)+dc_{11}+zm_{11}&amp;k_{12}(\theta)+dc_{12}+zm_{12}&amp;k_{13}(\theta)+dc_{13}+zm_{13}\\
+k_{21}(\theta)+dc_{21}+zm_{21}&amp;k_{22}(\theta)+dc_{22}+zm_{22}&amp;k_{23}(\theta)+dc_{23}+zm_{23}\\
+k_{31}(\theta)+dc_{31}+zm_{31}&amp;k_{32}(\theta)+dc_{32}+zm_{32}&amp;k_{33}(\theta)+dc_{33}+zm_{33}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> r stiffness parameters plus independent damping shift d and inertial shift z.</p><p><strong>Suggested sweep.</strong> mesh refinements.</p></div>
+<p><strong>Why use it.</strong> Treating d and z independently preserves an affine polynomial benchmark while representing the usual damped second-order dynamic stiffness after physical specialization.</p>
 </section>
-
 <section class="system" id="P19">
-  <div class="syshead"><span class="id">P19</span><h3>RLC modified-nodal-analysis network</h3><span class="badge">circuits / descriptor</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=node voltages + branch currents · m=component groups · degree=1 · nnz=sparse MNA</div>
-  <div class="formula">Use modified nodal analysis so inductors/voltage sources introduce branch-current unknowns.
-A(g,η,ℓ)=A_0 + Σ g_e G_e + Σ η_e C_e + Σ ℓ_e L_e.
-A x=b.
-Physical specialization may use η_e=s c_e and ℓ_e=s L_e.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Conductive, capacitive-dynamic, and inductive-dynamic branch parameters.</p><p><strong>Suggested sweep.</strong> ladders, meshes, interconnect networks.</p></div>
-  <p><strong>Why use it.</strong> MNA avoids rational nodal entries caused by eliminating inductors and yields a sparse polynomial matrix. It generalizes the simple RC ladder to arbitrary circuit topologies.</p>
+<div class="syshead"><span class="id">P19</span><h3>RLC modified-nodal-analysis network</h3><span class="badge">circuits / descriptor</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=node voltages + branch currents · m=component groups · degree=1 · nnz=sparse MNA</div>
+<div class="matrix-example"><div class="example-label">Example · 2 node voltages + 1 branch current</div><div class="math">\[
+A=\begin{bmatrix}
+g_1+\eta_1&amp;-g_1&amp;1\\
+-g_1&amp;g_1+g_2+\eta_2&amp;-1\\
+1&amp;-1&amp;-\ell_1
+\end{bmatrix}.
+\]</div><div class="example-note">A representative modified-nodal-analysis block with one current unknown.</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Conductive, capacitive-dynamic, and inductive-dynamic branch parameters.</p><p><strong>Suggested sweep.</strong> ladders, meshes, interconnect networks.</p></div>
+<p><strong>Why use it.</strong> MNA avoids rational nodal entries caused by eliminating inductors and yields a sparse polynomial matrix. It generalizes the simple RC ladder to arbitrary circuit topologies.</p>
 </section>
-
 <section class="system" id="P20">
-  <div class="syshead"><span class="id">P20</span><h3>Eddy-current / low-frequency electromagnetic FEM</h3><span class="badge">electromagnetics</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=field DOFs · m=r_μ+r_σ · degree=1 · nnz=sparse FEM</div>
-  <div class="formula">K(ρ)=K_0+Σ ρ_j K_j,  M(η)=Σ η_j M_j.
-A(ρ,η)=K(ρ)+M(η).
-A a=f.
-Physical specialization: ρ_j=μ_j^{-1}, η_j=s σ_j.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Reluctivity coefficients ρ_j and dynamic conductivity parameters η_j.</p><p><strong>Suggested sweep.</strong> mesh refinements; material regions.</p></div>
-  <p><strong>Why use it.</strong> Low-frequency Maxwell/eddy-current discretizations combine curl-curl and conductivity operators. Affine regional coefficients give a scalable electromagnetic application without nonpolynomial material laws.</p>
+<div class="syshead"><span class="id">P20</span><h3>Eddy-current / low-frequency electromagnetic FEM</h3><span class="badge">electromagnetics</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=field DOFs · m=r_μ+r_σ · degree=1 · nnz=sparse FEM</div>
+<div class="matrix-example"><div class="example-label">Example · N = 3</div><div class="math">\[
+A(\rho,\eta)=\begin{bmatrix}
+k_{11}(\rho)+m_{11}(\eta)&amp;k_{12}(\rho)+m_{12}(\eta)&amp;k_{13}(\rho)+m_{13}(\eta)\\
+k_{21}(\rho)+m_{21}(\eta)&amp;k_{22}(\rho)+m_{22}(\eta)&amp;k_{23}(\rho)+m_{23}(\eta)\\
+k_{31}(\rho)+m_{31}(\eta)&amp;k_{32}(\rho)+m_{32}(\eta)&amp;k_{33}(\rho)+m_{33}(\eta)
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Reluctivity coefficients ρ_j and dynamic conductivity parameters η_j.</p><p><strong>Suggested sweep.</strong> mesh refinements; material regions.</p></div>
+<p><strong>Why use it.</strong> Low-frequency Maxwell/eddy-current discretizations combine curl-curl and conductivity operators. Affine regional coefficients give a scalable electromagnetic application without nonpolynomial material laws.</p>
 </section>
-
 <section class="system" id="P21">
-  <div class="syshead"><span class="id">P21</span><h3>Fixed-source discrete-ordinates / radiative transport</h3><span class="badge">transport / block sparse</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=space×angle×group DOFs · m=cross sections · degree=1 · nnz=block sparse</div>
-  <div class="formula">After space/angle/energy discretization:
-A(Σ) ψ = q,
-A(Σ)=S_stream + Σ_r Σ_{t,r} D_r − Σ_{r,g,g′} Σ_{s,r,g′→g} R_{r,g,g′}.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Total and scattering cross sections by material region and energy-group coupling.</p><p><strong>Suggested sweep.</strong> increase cells, angles, groups.</p></div>
-  <p><strong>Why use it.</strong> Linear transport with fixed source is a major large sparse linear-solve application. Cross sections enter as polynomial/affine coefficients and the matrix is strongly nonsymmetric.</p>
+<div class="syshead"><span class="id">P21</span><h3>Fixed-source discrete-ordinates / radiative transport</h3><span class="badge">transport / block sparse</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=space×angle×group DOFs · m=cross sections · degree=1 · nnz=block sparse</div>
+<div class="matrix-example"><div class="example-label">Example · 3 transport unknowns</div><div class="math">\[
+A(\Sigma)=\begin{bmatrix}
+s_{11}+d_1(\Sigma_t)-r_{11}(\Sigma_s)&amp;s_{12}-r_{12}(\Sigma_s)&amp;s_{13}-r_{13}(\Sigma_s)\\
+s_{21}-r_{21}(\Sigma_s)&amp;s_{22}+d_2(\Sigma_t)-r_{22}(\Sigma_s)&amp;s_{23}-r_{23}(\Sigma_s)\\
+s_{31}-r_{31}(\Sigma_s)&amp;s_{32}-r_{32}(\Sigma_s)&amp;s_{33}+d_3(\Sigma_t)-r_{33}(\Sigma_s)
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Total and scattering cross sections by material region and energy-group coupling.</p><p><strong>Suggested sweep.</strong> increase cells, angles, groups.</p></div>
+<p><strong>Why use it.</strong> Linear transport with fixed source is a major large sparse linear-solve application. Cross sections enter as polynomial/affine coefficients and the matrix is strongly nonsymmetric.</p>
 </section>
-
 <section class="system" id="P22">
-  <div class="syshead"><span class="id">P22</span><h3>Multigroup neutron-diffusion fixed-source system</h3><span class="badge">nuclear / block diffusion</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=groups×spatial DOFs · m=cross sections · degree=1 · nnz=block sparse</div>
-  <div class="formula">For groups g=1,…,G:
-( K_g(D_g)+R_g(Σ_{r,g}) ) φ_g
- − Σ_{g′≠g} S_{g′→g}(Σ_s) φ_{g′} = q_g.
-Stack all groups into A(θ)φ=q.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Diffusion, removal, absorption, and inter-group scattering coefficients.</p><p><strong>Suggested sweep.</strong> 2–8 groups; refine spatial mesh.</p></div>
-  <p><strong>Why use it.</strong> This is a scalable block-coupled elliptic system used in reactor analysis. It adds energy-group coupling to ordinary diffusion matrices.</p>
+<div class="syshead"><span class="id">P22</span><h3>Multigroup neutron-diffusion fixed-source system</h3><span class="badge">nuclear / block diffusion</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=groups×spatial DOFs · m=cross sections · degree=1 · nnz=block sparse</div>
+<div class="matrix-example"><div class="example-label">Example · 2 energy groups</div><div class="math">\[
+A=\begin{bmatrix}
+K_1(D_1)+R_1(\Sigma_{r,1})&amp;-S_{2\to1}(\Sigma_s)\\
+-S_{1\to2}(\Sigma_s)&amp;K_2(D_2)+R_2(\Sigma_{r,2})
+\end{bmatrix}.
+\]</div><div class="example-note">Each displayed entry is itself a sparse spatial block.</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Diffusion, removal, absorption, and inter-group scattering coefficients.</p><p><strong>Suggested sweep.</strong> 2–8 groups; refine spatial mesh.</p></div>
+<p><strong>Why use it.</strong> This is a scalable block-coupled elliptic system used in reactor analysis. It adds energy-group coupling to ordinary diffusion matrices.</p>
 </section>
-
 <section class="system" id="P23">
-  <div class="syshead"><span class="id">P23</span><h3>General absorbing Markov-chain reachability</h3><span class="badge">probability / sparse graph</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=transient states · m=transient edges · degree=1 · nnz=O(edges)</div>
-  <div class="formula">Partition the transition matrix into transient T and absorbing target A.
-(I − P_TT) h = P_TA 1_target.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Transition probabilities on the chosen sparse directed graph, subject to stochastic specialization if desired.</p><p><strong>Suggested sweep.</strong> chains, grids, random sparse chains.</p></div>
-  <p><strong>Why use it.</strong> P5 is the birth–death special case. This version permits arbitrary sparse transition graphs and directly matches probabilistic model-checking reachability equations.</p>
+<div class="syshead"><span class="id">P23</span><h3>General absorbing Markov-chain reachability</h3><span class="badge">probability / sparse graph</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=transient states · m=transient edges · degree=1 · nnz=O(edges)</div>
+<div class="matrix-example"><div class="example-label">Example · 3 transient states</div><div class="math">\[
+I-P_{TT}=\begin{bmatrix}
+1-p_{11}&amp;-p_{12}&amp;-p_{13}\\
+-p_{21}&amp;1-p_{22}&amp;-p_{23}\\
+-p_{31}&amp;-p_{32}&amp;1-p_{33}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Transition probabilities on the chosen sparse directed graph, subject to stochastic specialization if desired.</p><p><strong>Suggested sweep.</strong> chains, grids, random sparse chains.</p></div>
+<p><strong>Why use it.</strong> P5 is the birth–death special case. This version permits arbitrary sparse transition graphs and directly matches probabilistic model-checking reachability equations.</p>
 </section>
-
 <section class="system" id="P24">
-  <div class="syshead"><span class="id">P24</span><h3>Continuous-time Markov mean first-passage time</h3><span class="badge">probability / CTMC</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=transient states · m=transition rates · degree=1 · nnz=O(edges)</div>
-  <div class="formula">Let Q_TT be the transient generator submatrix.
-(−Q_TT) τ = 1.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Off-diagonal transition rates; generator diagonals are the negative row sums.</p><p><strong>Suggested sweep.</strong> chains, networks, queueing CTMCs.</p></div>
-  <p><strong>Why use it.</strong> Mean hitting times are obtained from an ordinary linear solve. The generator entries are affine in the rates, and absorbing CTMCs make −Q_TT generically nonsingular.</p>
+<div class="syshead"><span class="id">P24</span><h3>Continuous-time Markov mean first-passage time</h3><span class="badge">probability / CTMC</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=transient states · m=transition rates · degree=1 · nnz=O(edges)</div>
+<div class="matrix-example"><div class="example-label">Example · 3 transient states</div><div class="math">\[
+-Q_{TT}=\begin{bmatrix}
+-q_{11}&amp;-q_{12}&amp;-q_{13}\\
+-q_{21}&amp;-q_{22}&amp;-q_{23}\\
+-q_{31}&amp;-q_{32}&amp;-q_{33}
+\end{bmatrix},\qquad
+(-Q_{TT})\tau=\begin{bmatrix}1\\1\\1\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Off-diagonal transition rates; generator diagonals are the negative row sums.</p><p><strong>Suggested sweep.</strong> chains, networks, queueing CTMCs.</p></div>
+<p><strong>Why use it.</strong> Mean hitting times are obtained from an ordinary linear solve. The generator entries are affine in the rates, and absorbing CTMCs make −Q_TT generically nonsingular.</p>
 </section>
-
 <section class="system" id="P25">
-  <div class="syshead"><span class="id">P25</span><h3>CTMC stationary distribution with normalization</h3><span class="badge">probability / normalized singular generator</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=states · m=transition rates · degree=1 · nnz=O(edges)+N</div>
-  <div class="formula">Start with Q(k)^T π=0 and 1^Tπ=1.
-Replace one row of Q(k)^T by 1^T and use RHS e_row:
-A(k)π=b.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Transition rates k_e of an irreducible CTMC.</p><p><strong>Suggested sweep.</strong> sparse irreducible graph families.</p></div>
-  <p><strong>Why use it.</strong> The raw generator is singular, but replacing one dependent balance equation by normalization produces a square generically nonsingular polynomial system.</p>
+<div class="syshead"><span class="id">P25</span><h3>CTMC stationary distribution with normalization</h3><span class="badge">probability / normalized singular generator</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=states · m=transition rates · degree=1 · nnz=O(edges)+N</div>
+<div class="matrix-example"><div class="example-label">Example · 3 states</div><div class="math">\[
+A=\begin{bmatrix}
+q_{11}&amp;q_{21}&amp;q_{31}\\
+q_{12}&amp;q_{22}&amp;q_{32}\\
+1&amp;1&amp;1
+\end{bmatrix},\qquad
+A\pi=\begin{bmatrix}0\\0\\1\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Transition rates k_e of an irreducible CTMC.</p><p><strong>Suggested sweep.</strong> sparse irreducible graph families.</p></div>
+<p><strong>Why use it.</strong> The raw generator is singular, but replacing one dependent balance equation by normalization produces a square generically nonsingular polynomial system.</p>
 </section>
-
 <section class="system" id="P26">
-  <div class="syshead"><span class="id">P26</span><h3>PageRank / personalized PageRank linear system</h3><span class="badge">web / graph analytics</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=web or graph nodes · m=1 (or selected edge weights) · degree=1 · nnz=O(edges)+N</div>
-  <div class="formula">For fixed stochastic P and personalization v:
-(I − α P^T) r = (1−α) v.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Damping parameter α. A variant fixes α and parameterizes selected transition weights instead.</p><p><strong>Suggested sweep.</strong> N=10³–10⁶ with sparse P.</p></div>
-  <p><strong>Why use it.</strong> This is a canonical graph-analytics linear system and scales to enormous sparse matrices. With only α symbolic it is an extreme large-N/single-parameter control benchmark.</p>
+<div class="syshead"><span class="id">P26</span><h3>PageRank / personalized PageRank linear system</h3><span class="badge">web / graph analytics</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=web or graph nodes · m=1 (or selected edge weights) · degree=1 · nnz=O(edges)+N</div>
+<div class="matrix-example"><div class="example-label">Example · 3 pages</div><div class="math">\[
+I-\alpha P^T=\begin{bmatrix}
+1-\alpha p_{11}&amp;-\alpha p_{21}&amp;-\alpha p_{31}\\
+-\alpha p_{12}&amp;1-\alpha p_{22}&amp;-\alpha p_{32}\\
+-\alpha p_{13}&amp;-\alpha p_{23}&amp;1-\alpha p_{33}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Damping parameter α. A variant fixes α and parameterizes selected transition weights instead.</p><p><strong>Suggested sweep.</strong> N=10³–10⁶ with sparse P.</p></div>
+<p><strong>Why use it.</strong> This is a canonical graph-analytics linear system and scales to enormous sparse matrices. With only α symbolic it is an extreme large-N/single-parameter control benchmark.</p>
 </section>
-
 <section class="system" id="P27">
-  <div class="syshead"><span class="id">P27</span><h3>Discounted Markov reward / fixed-policy value system</h3><span class="badge">reinforcement learning / DP</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=states · m=1 (or transition entries) · degree=1 · nnz=O(edges)+N</div>
-  <div class="formula">For a fixed policy π:
-(I − γ P_π) V = r_π.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Discount γ, or selected transition/reward coefficients with γ fixed.</p><p><strong>Suggested sweep.</strong> large sparse MDP state graphs.</p></div>
-  <p><strong>Why use it.</strong> Policy evaluation in a discounted Markov decision process is a linear system. It is algebraically close to PageRank but has a distinct dynamic-programming interpretation and RHS.</p>
+<div class="syshead"><span class="id">P27</span><h3>Discounted Markov reward / fixed-policy value system</h3><span class="badge">reinforcement learning / DP</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=states · m=1 (or transition entries) · degree=1 · nnz=O(edges)+N</div>
+<div class="matrix-example"><div class="example-label">Example · 3 states</div><div class="math">\[
+I-\gamma P_\pi=\begin{bmatrix}
+1-\gamma p_{11}&amp;-\gamma p_{12}&amp;-\gamma p_{13}\\
+-\gamma p_{21}&amp;1-\gamma p_{22}&amp;-\gamma p_{23}\\
+-\gamma p_{31}&amp;-\gamma p_{32}&amp;1-\gamma p_{33}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Discount γ, or selected transition/reward coefficients with γ fixed.</p><p><strong>Suggested sweep.</strong> large sparse MDP state graphs.</p></div>
+<p><strong>Why use it.</strong> Policy evaluation in a discounted Markov decision process is a linear system. It is algebraically close to PageRank but has a distinct dynamic-programming interpretation and RHS.</p>
 </section>
-
 <section class="system" id="P28">
-  <div class="syshead"><span class="id">P28</span><h3>First-order reaction / compartment / pharmacokinetic network</h3><span class="badge">chemical / biological networks</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=species or compartments · m=edges + sinks · degree=1 · nnz=O(edges)</div>
-  <div class="formula">For transfer rate k_{i→j} and sink d_i:
-A[i,i] = d_i + Σ_{j≠i} k_{i→j}
-A[j,i] = −k_{i→j}.
-A c = u.</div>
-  <div class="cols"><p><strong>Parameters.</strong> First-order transfer and elimination rates.</p><p><strong>Suggested sweep.</strong> chains, trees, sparse directed networks.</p></div>
-  <p><strong>Why use it.</strong> Steady first-order kinetics, linear compartment pharmacokinetics, tracer networks, and linear migration models all share this sparse directed M-matrix form.</p>
+<div class="syshead"><span class="id">P28</span><h3>First-order reaction / compartment / pharmacokinetic network</h3><span class="badge">chemical / biological networks</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=species or compartments · m=edges + sinks · degree=1 · nnz=O(edges)</div>
+<div class="matrix-example"><div class="example-label">Example · 3 compartments</div><div class="math">\[
+A=\begin{bmatrix}
+d_1+k_{1\to2}+k_{1\to3}&amp;-k_{2\to1}&amp;-k_{3\to1}\\
+-k_{1\to2}&amp;d_2+k_{2\to1}+k_{2\to3}&amp;-k_{3\to2}\\
+-k_{1\to3}&amp;-k_{2\to3}&amp;d_3+k_{3\to1}+k_{3\to2}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> First-order transfer and elimination rates.</p><p><strong>Suggested sweep.</strong> chains, trees, sparse directed networks.</p></div>
+<p><strong>Why use it.</strong> Steady first-order kinetics, linear compartment pharmacokinetics, tracer networks, and linear migration models all share this sparse directed M-matrix form.</p>
 </section>
-
 <section class="system" id="P29">
-  <div class="syshead"><span class="id">P29</span><h3>Leontief input–output production network</h3><span class="badge">economics / dense or sparse</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=sectors · m=nnz(C) · degree=1 · nnz=nnz(C)+N</div>
-  <div class="formula">Let C be the technical-coefficient matrix.
-(I − C) x = d.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Selected or all nonzero input-output coefficients c_ij.</p><p><strong>Suggested sweep.</strong> n=20,50,100,250 sectors.</p></div>
-  <p><strong>Why use it.</strong> The Leontief production model is one of the cleanest nonphysical application examples: the unknown gross outputs are rational functions of the inter-sector coefficients.</p>
+<div class="syshead"><span class="id">P29</span><h3>Leontief input–output production network</h3><span class="badge">economics / dense or sparse</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=sectors · m=nnz(C) · degree=1 · nnz=nnz(C)+N</div>
+<div class="matrix-example"><div class="example-label">Example · 3 sectors</div><div class="math">\[
+I-C=\begin{bmatrix}
+1-c_{11}&amp;-c_{12}&amp;-c_{13}\\
+-c_{21}&amp;1-c_{22}&amp;-c_{23}\\
+-c_{31}&amp;-c_{32}&amp;1-c_{33}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Selected or all nonzero input-output coefficients c_ij.</p><p><strong>Suggested sweep.</strong> n=20,50,100,250 sectors.</p></div>
+<p><strong>Why use it.</strong> The Leontief production model is one of the cleanest nonphysical application examples: the unknown gross outputs are rational functions of the inter-sector coefficients.</p>
 </section>
-
 <section class="system" id="P30">
-  <div class="syshead"><span class="id">P30</span><h3>Weighted least squares / sensor fusion normal equations</h3><span class="badge">statistics / estimation</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=number of fitted coefficients · m=m_obs+1 · degree=1 · nnz=usually dense</div>
-  <div class="formula">With fixed design rows h_i^T and observations z_i:
-A(w,λ)=Σ_i w_i h_i h_i^T + λ R
-b(w)=Σ_i w_i h_i z_i
-A(w,λ)x=b(w).</div>
-  <div class="cols"><p><strong>Parameters.</strong> Observation weights w_i and regularization λ.</p><p><strong>Suggested sweep.</strong> grow observations and model dimension.</p></div>
-  <p><strong>Why use it.</strong> Both A and b are affine in the weights. This covers weighted regression, sensor fusion, and many state-estimation subproblems while producing dense rational outputs.</p>
+<div class="syshead"><span class="id">P30</span><h3>Weighted least squares / sensor fusion normal equations</h3><span class="badge">statistics / estimation</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=number of fitted coefficients · m=m_obs+1 · degree=1 · nnz=usually dense</div>
+<div class="matrix-example"><div class="example-label">Example · 2 fitted coefficients</div><div class="math">\[
+A=\begin{bmatrix}
+\sum_i w_i h_{i1}^2+\lambda r_{11}&amp;\sum_i w_i h_{i1}h_{i2}+\lambda r_{12}\\
+\sum_i w_i h_{i1}h_{i2}+\lambda r_{21}&amp;\sum_i w_i h_{i2}^2+\lambda r_{22}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Observation weights w_i and regularization λ.</p><p><strong>Suggested sweep.</strong> grow observations and model dimension.</p></div>
+<p><strong>Why use it.</strong> Both A and b are affine in the weights. This covers weighted regression, sensor fusion, and many state-estimation subproblems while producing dense rational outputs.</p>
 </section>
-
 <section class="system" id="P31">
-  <div class="syshead"><span class="id">P31</span><h3>Equality-constrained quadratic-program KKT system</h3><span class="badge">optimization / saddle point</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n_primal+n_constraints · m=r · degree=1 · nnz=problem dependent</div>
-  <div class="formula">H(θ)=H_0+Σ θ_j H_j.
-[ H(θ)  A^T ] [x] = [−c]
-[   A      0 ] [ν]   [ b].</div>
-  <div class="cols"><p><strong>Parameters.</strong> Affine Hessian/model coefficients θ_j; A may also be parameterized affinely if desired.</p><p><strong>Suggested sweep.</strong> sparse QP families.</p></div>
-  <p><strong>Why use it.</strong> KKT systems are the computational core of equality-constrained quadratic optimization and many SQP subproblems. They add symmetric-indefinite block structure to the database.</p>
+<div class="syshead"><span class="id">P31</span><h3>Equality-constrained quadratic-program KKT system</h3><span class="badge">optimization / saddle point</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n_primal+n_constraints · m=r · degree=1 · nnz=problem dependent</div>
+<div class="matrix-example"><div class="example-label">Example · 2 primal variables + 1 constraint</div><div class="math">\[
+\begin{bmatrix}
+h_{11}(\theta)&amp;h_{12}(\theta)&amp;a_1\\
+h_{12}(\theta)&amp;h_{22}(\theta)&amp;a_2\\
+a_1&amp;a_2&amp;0
+\end{bmatrix}
+\begin{bmatrix}x_1\\x_2\\\nu\end{bmatrix}
+=\begin{bmatrix}-c_1\\-c_2\\b\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Affine Hessian/model coefficients θ_j; A may also be parameterized affinely if desired.</p><p><strong>Suggested sweep.</strong> sparse QP families.</p></div>
+<p><strong>Why use it.</strong> KKT systems are the computational core of equality-constrained quadratic optimization and many SQP subproblems. They add symmetric-indefinite block structure to the database.</p>
 </section>
-
 <section class="system" id="P32">
-  <div class="syshead"><span class="id">P32</span><h3>Interior-point / regularized normal-equation family</h3><span class="badge">optimization / diagonal params</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=constraints · m=n_cols+1 · degree=1 · nnz=depends on A</div>
-  <div class="formula">For fixed sparse constraint matrix A and diagonal D=diag(d_i):
-N(d,ρ)=A D A^T + ρ I.
-N(d,ρ) Δy = r.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Positive diagonal scaling/barrier parameters d_i and regularization ρ.</p><p><strong>Suggested sweep.</strong> large sparse LP/QP matrices.</p></div>
-  <p><strong>Why use it.</strong> Barrier and regularized optimization methods repeatedly solve matrices of this form. Each d_i multiplies a fixed rank-one column contribution, so the system is affine in many parameters.</p>
+<div class="syshead"><span class="id">P32</span><h3>Interior-point / regularized normal-equation family</h3><span class="badge">optimization / diagonal params</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=constraints · m=n_cols+1 · degree=1 · nnz=depends on A</div>
+<div class="matrix-example"><div class="example-label">Example · 2 constraints, 3 columns</div><div class="math">\[
+A D A^T+\rho I=
+\begin{bmatrix}
+\sum_{j=1}^3 d_j a_{1j}^2+\rho&amp;\sum_{j=1}^3d_j a_{1j}a_{2j}\\
+\sum_{j=1}^3d_j a_{1j}a_{2j}&amp;\sum_{j=1}^3 d_j a_{2j}^2+\rho
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Positive diagonal scaling/barrier parameters d_i and regularization ρ.</p><p><strong>Suggested sweep.</strong> large sparse LP/QP matrices.</p></div>
+<p><strong>Why use it.</strong> Barrier and regularized optimization methods repeatedly solve matrices of this form. Each d_i multiplies a fixed rank-one column contribution, so the system is affine in many parameters.</p>
 </section>
-
 <section class="system" id="P33">
-  <div class="syshead"><span class="id">P33</span><h3>Continuous-time Lyapunov equation (vectorized)</h3><span class="badge">control / Kronecker</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n² · m=r · degree=1 · nnz=Kronecker structured</div>
-  <div class="formula">A(θ)=A_0+Σ θ_j A_j.
-A(θ)^T X + X A(θ) = −Q.
-Vectorize:
-[I⊗A(θ)^T + A(θ)^T⊗I] vec(X) = −vec(Q).</div>
-  <div class="cols"><p><strong>Parameters.</strong> Affine state-matrix parameters θ_j.</p><p><strong>Suggested sweep.</strong> n=5,10,20,30.</p></div>
-  <p><strong>Why use it.</strong> Lyapunov equations are central to stability analysis and model reduction. Vectorization turns them into a parametric linear system whose dimension grows as n² and whose coefficient matrix has strong Kronecker structure.</p>
+<div class="syshead"><span class="id">P33</span><h3>Continuous-time Lyapunov equation (vectorized)</h3><span class="badge">control / Kronecker</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n² · m=r · degree=1 · nnz=Kronecker structured</div>
+<div class="matrix-example"><div class="example-label">Example · original A is 2×2</div><div class="math">\[
+A=\begin{bmatrix}a&amp;b\\c&amp;d\end{bmatrix}
+\quad\Longrightarrow\quad
+\mathcal L=\begin{bmatrix}
+2a&amp;c&amp;c&amp;0\\
+b&amp;a+d&amp;0&amp;c\\
+b&amp;0&amp;a+d&amp;c\\
+0&amp;b&amp;b&amp;2d
+\end{bmatrix}.
+\]</div><div class="example-note">Here \(\mathcal L=I\otimes A^T+A^T\otimes I\).</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Affine state-matrix parameters θ_j.</p><p><strong>Suggested sweep.</strong> n=5,10,20,30.</p></div>
+<p><strong>Why use it.</strong> Lyapunov equations are central to stability analysis and model reduction. Vectorization turns them into a parametric linear system whose dimension grows as n² and whose coefficient matrix has strong Kronecker structure.</p>
 </section>
-
 <section class="system" id="P34">
-  <div class="syshead"><span class="id">P34</span><h3>Sylvester matrix equation (vectorized)</h3><span class="badge">control / matrix equations</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n² (square case) · m=r+s · degree=1 · nnz=Kronecker structured</div>
-  <div class="formula">A(θ)X + X B(μ) = C.
-Vectorize:
-[I⊗A(θ) + B(μ)^T⊗I] vec(X)=vec(C).</div>
-  <div class="cols"><p><strong>Parameters.</strong> Affine coefficients θ in A and μ in B.</p><p><strong>Suggested sweep.</strong> n=5,10,20,30.</p></div>
-  <p><strong>Why use it.</strong> Sylvester equations occur in control, model reduction, and matrix-equation algorithms. They provide a clean two-sided Kronecker-sum benchmark distinct from ordinary sparse PDE matrices.</p>
+<div class="syshead"><span class="id">P34</span><h3>Sylvester matrix equation (vectorized)</h3><span class="badge">control / matrix equations</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n² (square case) · m=r+s · degree=1 · nnz=Kronecker structured</div>
+<div class="matrix-example"><div class="example-label">Example · A and B are 2×2</div><div class="math">\[
+\mathcal S=\begin{bmatrix}
+a_{11}+b_{11}&amp;a_{12}&amp;b_{21}&amp;0\\
+a_{21}&amp;a_{22}+b_{11}&amp;0&amp;b_{21}\\
+b_{12}&amp;0&amp;a_{11}+b_{22}&amp;a_{12}\\
+0&amp;b_{12}&amp;a_{21}&amp;a_{22}+b_{22}
+\end{bmatrix}.
+\]</div><div class="example-note">Here \(\mathcal S=I\otimes A+B^T\otimes I\).</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Affine coefficients θ in A and μ in B.</p><p><strong>Suggested sweep.</strong> n=5,10,20,30.</p></div>
+<p><strong>Why use it.</strong> Sylvester equations occur in control, model reduction, and matrix-equation algorithms. They provide a clean two-sided Kronecker-sum benchmark distinct from ordinary sparse PDE matrices.</p>
 </section>
-
 <section class="system" id="P35">
-  <div class="syshead"><span class="id">P35</span><h3>Descriptor state-space transfer resolvent / parametric MOR</h3><span class="badge">control / model reduction</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=state dimension · m=r+1 · degree=1 · nnz=application dependent</div>
-  <div class="formula">A(θ)=A_0+Σ θ_j A_j with fixed descriptor E.
-(s E − A(θ)) x = B u,
-y=Cx.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Laplace/frequency parameter s and r physical/design coefficients θ_j.</p><p><strong>Suggested sweep.</strong> N=10³–10⁵; r small.</p></div>
-  <p><strong>Why use it.</strong> This is the umbrella form behind many parametric model-reduction benchmarks. Real thermal, structural, MEMS, and circuit models often reduce to repeated solves of affine matrix pencils.</p>
+<div class="syshead"><span class="id">P35</span><h3>Descriptor state-space transfer resolvent / parametric MOR</h3><span class="badge">control / model reduction</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=state dimension · m=r+1 · degree=1 · nnz=application dependent</div>
+<div class="matrix-example"><div class="example-label">Example · N = 3</div><div class="math">\[
+sE-A(\theta)=\begin{bmatrix}
+se_{11}-a_{11}(\theta)&amp;se_{12}-a_{12}(\theta)&amp;se_{13}-a_{13}(\theta)\\
+se_{21}-a_{21}(\theta)&amp;se_{22}-a_{22}(\theta)&amp;se_{23}-a_{23}(\theta)\\
+se_{31}-a_{31}(\theta)&amp;se_{32}-a_{32}(\theta)&amp;se_{33}-a_{33}(\theta)
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Laplace/frequency parameter s and r physical/design coefficients θ_j.</p><p><strong>Suggested sweep.</strong> N=10³–10⁵; r small.</p></div>
+<p><strong>Why use it.</strong> This is the umbrella form behind many parametric model-reduction benchmarks. Real thermal, structural, MEMS, and circuit models often reduce to repeated solves of affine matrix pencils.</p>
 </section>
-
 <section class="system" id="P36">
-  <div class="syshead"><span class="id">P36</span><h3>Gaussian covariance-component / kriging solve</h3><span class="badge">statistics / dense SPD</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=observations · m=r+1 · degree=1 · nnz=N²</div>
-  <div class="formula">K(θ,σ²)=σ² I + Σ_{j=1}^r θ_j K_j, where K_j are fixed covariance components.
-K(θ,σ²) α = y.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Variance-component weights θ_j and nugget/noise variance σ².</p><p><strong>Suggested sweep.</strong> N=50,100,200,400.</p></div>
-  <p><strong>Why use it.</strong> Restricting to covariance mixtures keeps the dependence polynomial and affine, unlike common exponential length-scale hyperparameters. It gives a dense statistical benchmark with very few parameters.</p>
+<div class="syshead"><span class="id">P36</span><h3>Gaussian covariance-component / kriging solve</h3><span class="badge">statistics / dense SPD</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=observations · m=r+1 · degree=1 · nnz=N²</div>
+<div class="matrix-example"><div class="example-label">Example · N = 3, two covariance components</div><div class="math">\[
+K=\begin{bmatrix}
+\sigma^2+\theta_1k^{(1)}_{11}+\theta_2k^{(2)}_{11}&amp;\theta_1k^{(1)}_{12}+\theta_2k^{(2)}_{12}&amp;\theta_1k^{(1)}_{13}+\theta_2k^{(2)}_{13}\\
+\theta_1k^{(1)}_{21}+\theta_2k^{(2)}_{21}&amp;\sigma^2+\theta_1k^{(1)}_{22}+\theta_2k^{(2)}_{22}&amp;\theta_1k^{(1)}_{23}+\theta_2k^{(2)}_{23}\\
+\theta_1k^{(1)}_{31}+\theta_2k^{(2)}_{31}&amp;\theta_1k^{(1)}_{32}+\theta_2k^{(2)}_{32}&amp;\sigma^2+\theta_1k^{(1)}_{33}+\theta_2k^{(2)}_{33}
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Variance-component weights θ_j and nugget/noise variance σ².</p><p><strong>Suggested sweep.</strong> N=50,100,200,400.</p></div>
+<p><strong>Why use it.</strong> Restricting to covariance mixtures keeps the dependence polynomial and affine, unlike common exponential length-scale hyperparameters. It gives a dense statistical benchmark with very few parameters.</p>
 </section>
-
 <section class="system" id="P37">
-  <div class="syshead"><span class="id">P37</span><h3>Spline smoothing / penalized regression system</h3><span class="badge">statistics / graphics</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=spline coefficients · m=m_obs+1 · degree=1 · nnz=banded or sparse</div>
-  <div class="formula">With fixed spline basis B, data y, W=diag(w_i), and penalty matrix P:
-(B^T W B + λ P)c = B^T W y.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Data weights w_i and smoothing parameter λ.</p><p><strong>Suggested sweep.</strong> increase knots and data points.</p></div>
-  <p><strong>Why use it.</strong> This is a scalable application in curve fitting, smoothing, computer graphics, and statistics. Compact-support spline bases make the normal equations banded even with many symbolic observation weights.</p>
+<div class="syshead"><span class="id">P37</span><h3>Spline smoothing / penalized regression system</h3><span class="badge">statistics / graphics</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=spline coefficients · m=m_obs+1 · degree=1 · nnz=banded or sparse</div>
+<div class="matrix-example"><div class="example-label">Example · 3 spline coefficients</div><div class="math">\[
+B^TWB+\lambda P=\begin{bmatrix}
+g_{11}(w)+\lambda p_{11}&amp;g_{12}(w)+\lambda p_{12}&amp;g_{13}(w)+\lambda p_{13}\\
+g_{21}(w)+\lambda p_{21}&amp;g_{22}(w)+\lambda p_{22}&amp;g_{23}(w)+\lambda p_{23}\\
+g_{31}(w)+\lambda p_{31}&amp;g_{32}(w)+\lambda p_{32}&amp;g_{33}(w)+\lambda p_{33}
+\end{bmatrix}.
+\]</div><div class="example-note">\(G(w)=B^TWB\).</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Data weights w_i and smoothing parameter λ.</p><p><strong>Suggested sweep.</strong> increase knots and data points.</p></div>
+<p><strong>Why use it.</strong> This is a scalable application in curve fitting, smoothing, computer graphics, and statistics. Compact-support spline bases make the normal equations banded even with many symbolic observation weights.</p>
 </section>
-
 <section class="system" id="P38">
-  <div class="syshead"><span class="id">P38</span><h3>Tight-binding / discretized Schrödinger resolvent</h3><span class="badge">quantum / sparse resolvent</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=grid or lattice sites · m=N+1 (full local potential) · degree=1 · nnz=O(N)</div>
-  <div class="formula">Let H_0 be a fixed finite-difference/tight-binding kinetic matrix.
-A(E,v)=H_0 + diag(v_1,…,v_N) − E I.
-A(E,v) ψ = f.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Local potential values v_i and energy shift E.</p><p><strong>Suggested sweep.</strong> 1-D chains, 2-D lattices.</p></div>
-  <p><strong>Why use it.</strong> Discretized quantum Hamiltonians are sparse linear operators. The shifted resolvent converts the usual spectral model into a generically nonsingular parametric linear solve.</p>
+<div class="syshead"><span class="id">P38</span><h3>Tight-binding / discretized Schrödinger resolvent</h3><span class="badge">quantum / sparse resolvent</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=grid or lattice sites · m=N+1 (full local potential) · degree=1 · nnz=O(N)</div>
+<div class="matrix-example"><div class="example-label">Example · 4-site 1-D chain</div><div class="math">\[
+A(E,v)=\begin{bmatrix}
+v_1-E&amp;-t&amp;0&amp;0\\
+-t&amp;v_2-E&amp;-t&amp;0\\
+0&amp;-t&amp;v_3-E&amp;-t\\
+0&amp;0&amp;-t&amp;v_4-E
+\end{bmatrix}.
+\]</div><div class="example-note">Here \(t\) is a fixed nearest-neighbour hopping coefficient from \(H_0\).</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Local potential values v_i and energy shift E.</p><p><strong>Suggested sweep.</strong> 1-D chains, 2-D lattices.</p></div>
+<p><strong>Why use it.</strong> Discretized quantum Hamiltonians are sparse linear operators. The shifted resolvent converts the usual spectral model into a generically nonsingular parametric linear solve.</p>
 </section>
-
 <section class="system" id="P39">
-  <div class="syshead"><span class="id">P39</span><h3>Age-structured / Leslie population resolvent</h3><span class="badge">demography / companion-like</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=n age classes · m=2n · degree=1 · nnz=≈ 3n</div>
-  <div class="formula">Let L(f,s) be a Leslie matrix with fertility parameters f_1,…,f_n in row 1
-and survival parameters s_1,…,s_{n−1} on the subdiagonal.
-(z I − L(f,s))x=b.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Shift z, fertility f_i, and survival s_i (2n parameters total).</p><p><strong>Suggested sweep.</strong> n=20,50,100,200.</p></div>
-  <p><strong>Why use it.</strong> This gives a scalable demographic application with a sparse companion-like matrix and rational dependence on fertility/survival coefficients.</p>
+<div class="syshead"><span class="id">P39</span><h3>Age-structured / Leslie population resolvent</h3><span class="badge">demography / companion-like</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=n age classes · m=2n · degree=1 · nnz=≈ 3n</div>
+<div class="matrix-example"><div class="example-label">Example · n = 4</div><div class="math">\[
+zI-L=\begin{bmatrix}
+z-f_1&amp;-f_2&amp;-f_3&amp;-f_4\\
+-s_1&amp;z&amp;0&amp;0\\
+0&amp;-s_2&amp;z&amp;0\\
+0&amp;0&amp;-s_3&amp;z
+\end{bmatrix}.
+\]</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Shift z, fertility f_i, and survival s_i (2n parameters total).</p><p><strong>Suggested sweep.</strong> n=20,50,100,200.</p></div>
+<p><strong>Why use it.</strong> This gives a scalable demographic application with a sparse companion-like matrix and rational dependence on fertility/survival coefficients.</p>
 </section>
-
 <section class="system" id="P40">
-  <div class="syshead"><span class="id">P40</span><h3>Quasi-birth–death queueing reachability</h3><span class="badge">queueing / block tridiagonal</span><a class="toplink" href="#top">top</a></div>
-  <div class="meta">N=Lr transient states · m=3r² (homogeneous blocks) · degree=1 · nnz=O(Lr²)</div>
-  <div class="formula">Use L transient levels with r phases and homogeneous block transitions A_−, A_0, A_+.
-The reachability equations have block tridiagonal matrix
-T = blocktridiag(−A_−, I−A_0, −A_+),
-T h = b_boundary.</div>
-  <div class="cols"><p><strong>Parameters.</strong> Entries of the three r×r phase-transition blocks (subject to stochastic specialization if desired).</p><p><strong>Suggested sweep.</strong> r=2,4,8; L=10,20,40,80.</p></div>
-  <p><strong>Why use it.</strong> Quasi-birth–death models are standard in queueing and reliability. Holding r fixed while increasing the number of levels L creates a block-structured large-N benchmark with essentially fixed interpolation dimension.</p>
+<div class="syshead"><span class="id">P40</span><h3>Quasi-birth–death queueing reachability</h3><span class="badge">queueing / block tridiagonal</span><a class="toplink" href="#top">top</a></div>
+<div class="meta">N=Lr transient states · m=3r² (homogeneous blocks) · degree=1 · nnz=O(Lr²)</div>
+<div class="matrix-example"><div class="example-label">Example · 3 levels</div><div class="math">\[
+T=\begin{bmatrix}
+I-A_0&amp;-A_+&amp;0\\
+-A_-&amp;I-A_0&amp;-A_+\\
+0&amp;-A_-&amp;I-A_0
+\end{bmatrix}.
+\]</div><div class="example-note">Each displayed entry is an \(r\times r\) phase block.</div></div>
+<div class="cols"><p><strong>Parameters.</strong> Entries of the three r×r phase-transition blocks (subject to stochastic specialization if desired).</p><p><strong>Suggested sweep.</strong> r=2,4,8; L=10,20,40,80.</p></div>
+<p><strong>Why use it.</strong> Quasi-birth–death models are standard in queueing and reliability. Holding r fixed while increasing the number of levels L creates a block-structured large-N benchmark with essentially fixed interpolation dimension.</p>
 </section>
-<hr>
+<hr/>
 <h2 id="aliases">Application equivalence map</h2>
 <p>Many important applications are algebraically the same after discretization. The table below prevents the database from inflating itself with duplicate generators while still recording the application provenance uncovered in the search.</p>
 <div class="tablewrap"><table>
@@ -803,7 +1136,7 @@ T h = b_boundary.</div>
 <strong>Important models searched but intentionally not added as separate polynomial linear-system families.</strong>
 Full AC power flow, nonlinear Navier–Stokes, nonlinear elasticity, semiconductor drift–diffusion with carrier nonlinearities, general mass-action chemical networks of order &gt;1, and nonlinear radiative/material laws are nonlinear in the unknowns. Gaussian-process kernels with symbolic exponential length scales are nonpolynomial in those hyperparameters. Ungrounded Laplacians and raw Markov generators are singular until a gauge/ground/normalization is imposed. Pure eigenvalue formulations are not <code>A(y)x=b(y)</code>; when useful they are represented here by a shifted resolvent such as P15, P17, P38, or P39. Circuit formulations that become rational after eliminating inductors are represented with MNA instead (P19).
 </div>
-<hr>
+<hr/>
 <h2 id="protocol">Suggested benchmark protocol</h2>
 <div class="box protocol">
 <p><strong>1. Preserve the polynomial parameterization.</strong> Evaluate the declared independent benchmark parameters modulo p, build <code>[A|b]</code>, solve, and reconstruct the rational solution. Physical identifications such as <code>d_i=ω²m_i</code> should be imposed only after reconstruction when the affine benchmark form is being used.</p>
@@ -812,7 +1145,6 @@ Full AC power flow, nonlinear Navier–Stokes, nonlinear elasticity, semiconduct
 <p><strong>4. Record structure.</strong> At minimum record N, m, max input degree, nnz(A), block structure, probes, rejected probes, modular-solve time, univariate reconstruction time, multivariate reconstruction time, verification time, and total time.</p>
 <p><strong>5. Verify at fresh points.</strong> Substitute one or more random parameter points not used in reconstruction and check <code>A(α)x(α)=b(α) mod p</code>.</p>
 </div>
-
 <h3>Recommended application-focused benchmark suite</h3>
 <div class="tablewrap"><table><thead><tr><th>purpose</th><th>family</th><th>suggested sweep</th><th>what it isolates</th></tr></thead><tbody>
 <tr><td>hard graph denominator</td><td>P1</td><td>q=4,5,6</td><td>output-support growth</td></tr>
@@ -826,33 +1158,7 @@ Full AC power flow, nonlinear Navier–Stokes, nonlinear elasticity, semiconduct
 <tr><td>dense statistics</td><td>P36</td><td>N=50,100,200</td><td>dense few-parameter application</td></tr>
 <tr><td>block queueing</td><td>P40</td><td>fixed r, grow L</td><td>large block-tridiagonal N with fixed interpolation dimension</td></tr>
 </tbody></table></div>
-<hr>
-<h2 id="refs">References and provenance</h2>
-<ol class="refs">
-<li>J. Verschelde, <a href="https://homepages.math.uic.edu/~jan/demo.html">The database of polynomial systems</a>. The page organization is inspired by this benchmark-database style.</li>
-<li>A. Jinadu and M. Monagan, <a href="https://www.cecm.sfu.ca/CAG/papers/AyoolaCASC23.pdf">Solving Parametric Linear Systems using Sparse Rational Function Interpolation</a>, CASC 2023. This is the target problem setting: full-rank <code>A(y)x=b(y)</code> with polynomial parameter entries and rational-function solutions.</li>
-<li>NIST, <a href="https://math.nist.gov/MatrixMarket/applications.html">Matrix Market application domains</a> and <a href="https://math.nist.gov/MatrixMarket/">Matrix Market</a>. These were used to make the application-domain sweep broad rather than PDE-only.</li>
-<li>R. Barrett et al., <a href="https://www.netlib.org/templates/templates.pdf">Templates for the Solution of Linear Systems</a>, SIAM/Netlib. Provides standard sparse linear-system provenance from finite-difference, finite-element, and network applications.</li>
-<li>SuiteSparse Matrix Collection, <a href="https://sparse.tamu.edu/Oberwolfach">Oberwolfach model-reduction collection</a>. It contains large thermal, structural, MEMS and parametric-model examples, including affine film-coefficient thermal models and structural frequency-response systems.</li>
-<li>MIT RLE, <a href="https://www.rle.mit.edu/cpg/publications/pub153.pdf">Coupled Circuit-Interconnect Analysis Using Stable Arnoldi Techniques</a>. Source for modified nodal analysis / RLC descriptor-system motivation.</li>
-<li>MATPOWER, <a href="https://matpower.org/docs/MATPOWER-manual-8.0.pdf">User's Manual 8.0</a>. Source for the linear DC power-flow susceptance equations.</li>
-<li>PETSc, <a href="https://petsc.org/release/tutorials/physics/guide_to_stokes/">Guide to the Stokes Equations using Finite Elements</a>. Source for mixed Stokes discretization.</li>
-<li>MFEM, <a href="https://mfem.org/nurbs/">Mixed Darcy example</a> and <a href="https://mfem.org/examples/">finite-element examples including Helmholtz</a>. Sources for P14/P15-type systems.</li>
-<li>NIST, <a href="https://www.nist.gov/services-resources/software/finite-elementfinite-difference-programs">Finite Element/Finite Difference Programs</a>. Demonstrates large linear electric, elastic, and thermal PDE discretizations across 2-D/3-D applications.</li>
-<li>Stanford, <a href="https://web.stanford.edu/group/SOL/dissertations/pagerank-sensitivity-thesis-online.pdf">Models and Algorithms for PageRank Sensitivity</a>. Source for the PageRank linear-system form.</li>
-<li>MIT 18.445 lecture notes, <a href="https://math.mit.edu/classes/18.445/18445all/diario/18445_diario.pdf">Markov chains and mean passage times</a>. Source for the CTMC first-passage linear solve.</li>
-<li>Stanford EE364a, <a href="https://web.stanford.edu/class/ee364a/lectures/equality.pdf">Equality constrained minimization</a>. Source for the quadratic-program KKT matrix.</li>
-<li>Stanford, <a href="https://see.stanford.edu/materials/lsoeldsee263/08-min-norm.pdf">regularized least squares notes</a>. Source for weighted/regularized normal-equation application forms.</li>
-<li>SLICOT, <a href="https://www.slicot.org/objects/software/shared/doc/SB03MD.html">SB03MD Lyapunov solver documentation</a>. Source for continuous/discrete Lyapunov equations used in control and model reduction.</li>
-<li>MIT OpenCourseWare, <a href="https://ocw.mit.edu/courses/14-15-networks-spring-2022/mit14_15s22_lec4.pdf">Production Networks / Leontief approach</a>. Source for the economic input-output application.</li>
-<li>Los Alamos National Laboratory, <a href="https://mcnp.lanl.gov/pdf_files/TechReport_2018_LANL_LA-UR-18-20247_Brown.pdf">Advanced Computational Methods for Monte Carlo Calculations</a> and deterministic transport background. Source for transport/neutron application provenance.</li>
-<li>Stanford EE263, <a href="https://ee263.stanford.edu/archive/ee263_course_reader.pdf">course reader</a>. Includes finite-difference Schrödinger discretization and broad linear-system applications.</li>
-<li>C. Rasmussen and C. Williams, <a href="https://direct.mit.edu/books/oa-monograph/chapter-pdf/2426818/f010001_9780262256834.pdf">Gaussian Processes for Machine Learning</a>. Source for covariance-matrix linear solves; P36 restricts to affine covariance-component parameterizations so the entries remain polynomial.</li>
-</ol>
-<footer>
-Last updated 2026-08-10. The application catalog was expanded after a cross-domain search of benchmark repositories, numerical software documentation, and primary/academic sources. Families are formula-generated so size, topology, and parameter count can be swept reproducibly.
-</footer>
-
+<footer>Last updated 2026-08-10 · Formula-generated benchmark families for parametric polynomial linear systems.</footer>
 </main>
 </body>
 </html>
