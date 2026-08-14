@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Database of Scalable Parametric Linear Systems</title>
-<meta name="description" content="Scalable benchmark families for solving polynomial parametric linear systems by finite-field probing and rational-function reconstruction.">
+<title>Parametric Linear Systems DB</title>
+<meta name="description" content="A database containing parametric polynomial linear systems that can be solved 
+  efficiently using the package <a href="https://www.cecm.sfu.ca/~mmonagan/code/KYsolve/">KYSolve</a>.">
 <style>
   :root{
     --ink:#111;
@@ -109,26 +110,22 @@
 <body>
 <main id="top">
 
-<h1>The database of scalable parametric linear systems</h1>
+<h1>Database of parametric polynomial linear systems</h1>
 <p class="lead">
 This collection is for benchmarking algorithms that solve
 <code>A(y) x = b(y)</code> by evaluating the parameters in a finite field, solving the resulting
-numerical linear systems, and reconstructing the entries of <code>x</code> as multivariate rational functions.
-The organization follows the spirit of Jan Verschelde's PHCpack demonstration database: a compact system index,
-a characteristic table, precise definitions, and benchmark guidance.
+numerical linear systems and then reconstructing the entries of <code>x</code> as multivariate rational functions.
 </p>
 
 <div class="box criteria">
-  <strong>Inclusion rule.</strong> Every family below is (i) linear in the unknown vector <code>x</code>,
-  (ii) scalable to a genuinely large matrix, (iii) polynomial in one or more symbolic parameters,
-  and (iv) generically nonsingular. There are no singular-kernel examples and no matrices with rational entries
-  that first have to be cleared. Unless a natural application right-hand side is stated, use the fixed integer vector
-  <code>b = [1,2,...,N]^T</code>; it adds no parameters and avoids some accidental symmetries.
+  <strong>Inclusion rule.</strong> Every matrix family below is (i) linear in the unknown vector <code>x</code>
+  (ii) Potential to scale into a large matrix (iii) Generically nonsingular. Unless stated otherwise, we use the fixed integer vector
+  <code>b = [1,2,...,N]^T</code> or <code>b = [1,1,...,N]^T</code> as it adds no parameters and avoids some accidental symmetries.
 </div>
 
 <p><strong>Sections:</strong>
-  <a href="#short">Short descriptions</a> |
-  <a href="#char">Characteristic numbers</a> |
+  <a href="#short">Overview of systems</a> |
+  <a href="#char">System ID's</a> |
   <a href="#systems">System definitions</a> |
   <a href="#protocol">Benchmark protocol</a> |
   <a href="#refs">References</a>
@@ -136,26 +133,74 @@ a characteristic table, precise definitions, and benchmark guidance.
 
 <hr>
 
-<h2 id="short">Short description of systems</h2>
-<p class="small">S1–S6 are structured matrix families; R1–R3 are algebraic/resultant families; P1–P40 are scalable application-motivated families. Mathematically duplicate applications are cross-referenced rather than cloned into multiple generators.</p>
+<h2 id="short">Overview of systems</h2>
+<p class="small">S1–S6 are structured matrix families. R1–R3 are algebraic or resultant families. P1–P40 are scalable application motivated families.</p>
 <div class="index">
-<a href="#S1">S1 symmetric Toeplitz</a> | <a href="#S2">S2 general Toeplitz</a> | <a href="#S3">S3 Hankel</a> | <a href="#S4">S4 banded Toeplitz</a> | <a href="#S5">S5 block Toeplitz / Toeplitz blocks</a> | <a href="#S6">S6 generic tridiagonal</a><br>
-<a href="#R1">R1 Sylvester resultant matrix</a> | <a href="#R2">R2 Bézout matrix</a> | <a href="#R3">R3 companion resolvent</a><br>
-<a href="#P1">P1 Grounded weighted q×q grid Laplacian</a> | <a href="#P2">P2 2-D convection–diffusion–reaction finite difference</a> | <a href="#P3">P3 RC ladder nodal admittance</a> | <a href="#P4">P4 Mass–spring chain dynamic stiffness (affine reparameterization)</a> | <a href="#P5">P5 Birth–death Markov-chain reachability</a> | <a href="#P6">P6 General grounded resistor / conductance network</a> | <a href="#P7">P7 DC power-flow network</a> | <a href="#P8">P8 1-D variable-conductivity diffusion / heat equation</a><br>
-<a href="#P9">P9 2-D anisotropic variable-coefficient diffusion</a> | <a href="#P10">P10 Thermal model with parametric Robin / film coefficients</a> | <a href="#P11">P11 Transient thermal descriptor / Laplace-domain heat model</a> | <a href="#P12">P12 Darcy / groundwater / single-phase reservoir pressure</a> | <a href="#P13">P13 Variable-viscosity Stokes mixed finite-element system</a> | <a href="#P14">P14 Mixed Darcy saddle-point system</a> | <a href="#P15">P15 Helmholtz / acoustic frequency-response system</a> | <a href="#P16">P16 Static truss / linear-elasticity stiffness system</a><br>
-<a href="#P17">P17 Structural FEM frequency response</a> | <a href="#P18">P18 Damped structural dynamics affine dynamic stiffness</a> | <a href="#P19">P19 RLC modified-nodal-analysis network</a> | <a href="#P20">P20 Eddy-current / low-frequency electromagnetic FEM</a> | <a href="#P21">P21 Fixed-source discrete-ordinates / radiative transport</a> | <a href="#P22">P22 Multigroup neutron-diffusion fixed-source system</a> | <a href="#P23">P23 General absorbing Markov-chain reachability</a> | <a href="#P24">P24 Continuous-time Markov mean first-passage time</a><br>
-<a href="#P25">P25 CTMC stationary distribution with normalization</a> | <a href="#P26">P26 PageRank / personalized PageRank linear system</a> | <a href="#P27">P27 Discounted Markov reward / fixed-policy value system</a> | <a href="#P28">P28 First-order reaction / compartment / pharmacokinetic network</a> | <a href="#P29">P29 Leontief input–output production network</a> | <a href="#P30">P30 Weighted least squares / sensor fusion normal equations</a> | <a href="#P31">P31 Equality-constrained quadratic-program KKT system</a> | <a href="#P32">P32 Interior-point / regularized normal-equation family</a><br>
-<a href="#P33">P33 Continuous-time Lyapunov equation (vectorized)</a> | <a href="#P34">P34 Sylvester matrix equation (vectorized)</a> | <a href="#P35">P35 Descriptor state-space transfer resolvent / parametric MOR</a> | <a href="#P36">P36 Gaussian covariance-component / kriging solve</a> | <a href="#P37">P37 Spline smoothing / penalized regression system</a> | <a href="#P38">P38 Tight-binding / discretized Schrödinger resolvent</a> | <a href="#P39">P39 Age-structured / Leslie population resolvent</a> | <a href="#P40">P40 Quasi-birth–death queueing reachability</a>
+<a href="#S1">S1 Symmetric Toeplitz</a><br>
+<a href="#S2">S2 General Toeplitz</a><br>
+<a href="#S3">S3 Hankel matrix</a><br>
+<a href="#S4">S4 Banded Toeplitz</a><br>
+<a href="#S5">S5 Block Toeplitz</a><br>
+<a href="#S6">S6 Generic tridiagonal matrix</a><br>
+
+<a href="#R1">R1 Sylvester resultant matrix</a><br>
+<a href="#R2">R2 Bézout matrix</a><br>
+<a href="#R3">R3 Companion resolvent</a><br>
+
+<a href="#P1">P1 Grounded weighted q×q grid Laplacian</a><br>
+<a href="#P2">P2 2-D convection diffusion reaction finite difference matrix</a><br>
+<a href="#P3">P3 RC ladder nodal admittance matrix</a><br>
+<a href="#P4">P4 Mass spring chain dynamic stiffness</a><br>
+<a href="#P5">P5 Birth death Markov chain reachability</a><br>
+<a href="#P6">P6 General grounded resistor network</a><br>
+<a href="#P7">P7 DC power flow network</a><br>
+<a href="#P8">P8 1-D variable conductivity diffusion</a><br>
+<a href="#P9">P9 2-D anisotropic variable coefficient diffusion</a><br>
+<a href="#P10">P10 Thermal model with parametric Robin-film coefficients</a><br>
+<a href="#P11">P11 Laplace domain heat model</a><br>
+<a href="#P12">P12 Single phase reservoir pressure</a><br>
+<a href="#P13">P13 Variable viscosity Stokes mixed finite element system</a><br>
+<a href="#P14">P14 Mixed Darcy saddle point system</a><br>
+<a href="#P15">P15 Acoustic frequency response system</a><br>
+<a href="#P16">P16 Linear elasticity stiffness system</a><br>
+<a href="#P17">P17 Structural FEM frequency response</a><br>
+<a href="#P18">P18 Damped structural dynamics affine dynamic stiffness</a><br>
+<a href="#P19">P19 RLC modified nodal analysis network</a><br>
+<a href="#P20">P20 Low frequency electromagnetic FEM</a><br>
+<a href="#P21">P21 Radiative transport</a><br>
+<a href="#P22">P22 Multigroup neutron diffusion fixed source system</a><br>
+<a href="#P23">P23 General absorbing Markov chain reachability</a><br>
+<a href="#P24">P24 Continuous time Markov mean first passage time</a><br>
+<a href="#P25">P25 CTMC stationary distribution with normalization</a><br>
+<a href="#P26">P26 PageRank linear system</a><br>
+<a href="#P27">P27 Fixed policy value system</a><br>
+<a href="#P28">P28 Pharmacokinetic network</a><br>
+<a href="#P29">P29 Leontief input output production network</a><br>
+<a href="#P30">P30 Sensor fusion normal equations</a><br>
+<a href="#P31">P31 Equality constrained quadratic program KKT system</a><br>
+<a href="#P32">P32 Regularized normal equation family</a><br>
+<a href="#P33">P33 Continuous time Lyapunov equation</a><br>
+<a href="#P34">P34 Sylvester matrix equation</a><br>
+<a href="#P35">P35 Parametric MOR</a><br>
+<a href="#P36">P36 Gaussian covariance component</a><br>
+<a href="#P37">P37 Penalized regression system</a><br>
+<a href="#P38">P38 Discretized Schrödinger resolvent</a><br>
+<a href="#P39">P39 Leslie population resolvent</a><br>
+<a href="#P40">P40 Quasi birth death queueing reachability</a>
 </div>
 
 <div class="box criteria">
-  <strong>Scope of the exhaustive application search.</strong> The application sweep covered the major linear-system domains represented in NIST Matrix Market and SuiteSparse/Oberwolfach, plus parametric model reduction, PDE discretization, circuits, structures, power networks, stochastic processes, optimization, control, statistics/ML, economics, nuclear/radiative transport, and quantum models. No finite web page can literally enumerate every scientific model ever written; this page is exhaustive at the level of reusable <em>canonical scalable algebraic families</em> satisfying the inclusion rule. Applications that reduce to the same polynomial matrix family are listed as aliases rather than duplicated.
+  The applications above cover the major linear system domains represented in NIST Matrix Market and SuiteSparse/Oberwolfach, 
+  plus parametric model reduction, PDE discretization, circuits, structures, power networks, stochastic processes, optimization, 
+  control, statistics/ML, economics, nuclear and radiative transport and quantum models. 
 </div>
-<hr>
-<h2 id="char">Characteristic numbers</h2>
+
+  <hr>
+<h2 id="char">System ID's</h2>
 <div class="tablewrap">
-<table aria-label="Characteristic numbers of benchmark families">
-<thead><tr><th>ID</th><th>family</th><th>matrix dimension N</th><th># parameters m</th><th>max input degree</th><th>nonzeros</th><th>good first sweep</th><th>main stress</th></tr></thead>
+<table aria-label="System ID's of benchmark families">
+<thead><tr><th>Sys. ID</th><th>Matrix family</th><th>Matrix dimension 'N'</th><th># No. of parameters 'm'</th>
+  <th>Max input degree</th><th>No. of nonzero entries</th><th>Recom. first input</th><th>Main app.</th></tr></thead>
 <tbody>
 <tr class="core"><td>S1</td><td>Symmetric Toeplitz</td><td class="num">n</td><td class="num">n</td><td class="num">1</td><td class="num">n²</td><td>n=8,12,16,20</td><td>dense output complexity</td></tr>
 <tr class=""><td>S2</td><td>General Toeplitz</td><td class="num">n</td><td class="num">2n−1</td><td class="num">1</td><td class="num">n²</td><td>n=6,8,10,12</td><td>parameter-count growth</td></tr>
